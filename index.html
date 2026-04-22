@@ -6,26 +6,35 @@
   <title>Tiny Canvas Cafe — Meet, Sip & Create</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+SC:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=Space+Mono:wght@400;700&family=Caveat:wght@400;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <style>
+    /* STEP 2 & 3 — updated + extended CSS variables */
     :root {
-      --espresso:   #070402;
-      --roast:      #0F0804;
-      --coffee:     #1C0E06;
-      --mocha:      #261408;
-      --amber:      #C47828;
-      --gold:       #D4904A;
-      --honey:      #E8A850;
-      --cream:      #F5ECD7;
-      --latte:      #EDE0CC;
-      --tan:        #C4A882;
-      --f-display:  'Cormorant SC', serif;
-      --f-head:     'Playfair Display', serif;
-      --f-body:     'DM Sans', sans-serif;
-      --f-mono:     'Space Mono', monospace;
-      --f-hand:     'Caveat', cursive;
-      --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+      --espresso:     #070402;
+      --roast:        #0F0804;
+      --coffee:       #1C0E06;
+      --mocha:        #261408;
+      --amber:        #C47828;
+      --gold:         #D4904A;
+      --honey:        #E8A850;
+      --cream:        #f7f1e8;
+      --latte:        #EDE0CC;
+      --tan:          #d9c9ae;
+      --parchment:    #f0e9d8;
+      --warm-mid:     #c4a882;
+      --choco-light:  #8b5e3c;
+      --choco:        #5c3317;
+      --choco-dark:   #3b1f0b;
+      --accent-gold:  #b8864e;
+      --text-body:    #4a2e14;
+      --f-display:    'Cormorant SC', serif;
+      --f-head:       'Playfair Display', serif;
+      --f-body:       'DM Sans', sans-serif;
+      --f-mono:       'Space Mono', monospace;
+      --f-hand:       'Caveat', cursive;
+      --f-bask:       'Libre Baskerville', serif;
+      --ease-out:     cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -97,6 +106,38 @@
     .nav-cta:hover { background:var(--amber); border-color:var(--amber); color:var(--espresso) !important; }
     @media (min-width:768px) { .nav-links { display:flex; } }
 
+    /* STEP 12 — Hamburger */
+    .nav-burger {
+      display:none; flex-direction:column; justify-content:center; gap:5px;
+      background:none; border:none; cursor:pointer; padding:6px; z-index:850;
+    }
+    .nav-burger span {
+      display:block; width:22px; height:1.5px; background:var(--cream);
+      transition:all .3s var(--ease-out); transform-origin:center;
+    }
+    .nav-burger.open span:nth-child(1) { transform:translateY(6.5px) rotate(45deg); }
+    .nav-burger.open span:nth-child(2) { opacity:0; transform:scaleX(0); }
+    .nav-burger.open span:nth-child(3) { transform:translateY(-6.5px) rotate(-45deg); }
+    @media(max-width:767px) { .nav-burger { display:flex; } }
+
+    .nav-mobile {
+      position:fixed; top:72px; left:0; right:0; z-index:799;
+      background:rgba(7,4,2,.97); backdrop-filter:blur(24px);
+      border-bottom:1px solid rgba(196,168,130,.07);
+      flex-direction:column; gap:0; padding:8px 24px 20px;
+      transform:translateY(-12px); opacity:0; pointer-events:none;
+      transition:transform .35s var(--ease-out), opacity .35s;
+      display:flex;
+    }
+    .nav-mobile.open { transform:translateY(0); opacity:1; pointer-events:auto; }
+    .nav-mobile a {
+      font-family:var(--f-mono); font-size:.68rem; letter-spacing:.2em; text-transform:uppercase;
+      color:rgba(196,168,130,.65); text-decoration:none; padding:16px 0;
+      border-bottom:1px solid rgba(196,168,130,.06); transition:color .25s; display:block;
+    }
+    .nav-mobile a:last-child { border-bottom:none; }
+    .nav-mobile a:hover { color:var(--cream); }
+
     /* ── HERO ── */
     #hero {
       position:relative; min-height:100vh;
@@ -105,9 +146,7 @@
     }
     #hero-canvas { position:absolute; inset:0; width:100%; height:100%; z-index:1; }
     .hero-ambient { position:absolute; inset:0; z-index:2; pointer-events:none; }
-    .hero-orb {
-      position:absolute; border-radius:50%; pointer-events:none;
-    }
+    .hero-orb { position:absolute; border-radius:50%; pointer-events:none; }
     .hero-orb-1 {
       width:800px; height:800px; top:50%; left:50%;
       transform:translate(-50%,-50%);
@@ -154,7 +193,6 @@
       -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
     }
 
-    /* 3D Cup */
     .hero-cup-wrap {
       width:clamp(180px,22vw,300px); height:clamp(200px,24vw,320px);
       position:relative; margin:28px 0;
@@ -383,6 +421,31 @@
     .menu-dots { flex:1; border-bottom:1px dashed rgba(196,168,130,.18); margin-bottom:5px; }
     .menu-price { font-family:var(--f-mono); font-size:.82rem; color:var(--amber); white-space:nowrap; }
 
+    /* STEP 6 — FAQ */
+    #faq { background:var(--roast); }
+    .faq-list { margin-top:48px; border-top:1px solid rgba(196,168,130,.1); }
+    .faq-item { border-bottom:1px solid rgba(196,168,130,.1); }
+    .faq-q {
+      width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px;
+      padding:24px 0; background:none; border:none; cursor:pointer;
+      font-family:var(--f-head); font-size:1.1rem; font-weight:700;
+      color:var(--cream); text-align:left; transition:color .25s;
+    }
+    .faq-q:hover { color:var(--amber); }
+    .faq-toggle {
+      font-family:var(--f-mono); font-size:1.1rem; color:var(--choco-light); flex-shrink:0;
+      width:28px; height:28px; display:flex; align-items:center; justify-content:center;
+      border:1px solid rgba(196,168,130,.2); border-radius:2px;
+      transition:background .3s, color .3s;
+    }
+    .faq-item.open .faq-toggle { background:var(--choco-light); color:var(--cream); }
+    .faq-a { max-height:0; overflow:hidden; transition:max-height .45s var(--ease-out); }
+    .faq-a-inner {
+      font-family:var(--f-bask); font-size:.92rem; font-style:italic;
+      color:var(--tan); line-height:1.85; padding:0 48px 24px 0;
+    }
+    .faq-item.open .faq-a { max-height:200px; }
+
     /* ── GALLERY ── */
     #gallery { background:var(--espresso); overflow:hidden; }
     .gallery-surface {
@@ -405,7 +468,7 @@
       box-shadow:0 4px 14px rgba(0,0,0,.5), 0 22px 64px rgba(0,0,0,.35);
       cursor:pointer; flex-shrink:0;
       transition:transform .45s cubic-bezier(.34,1.56,.64,1), box-shadow .4s;
-      width:clamp(130px,17vw,178px);
+      width:clamp(130px,17vw,178px); position:relative;
     }
     .pol:nth-child(1){transform:rotate(-4.5deg);}
     .pol:nth-child(2){transform:rotate(2.5deg) translateY(-18px);}
@@ -429,6 +492,163 @@
     .cta-title em { font-style:italic; color:var(--amber); }
     .cta-sub { font-size:.97rem; color:var(--tan); line-height:1.75; margin-bottom:48px; }
 
+    /* STEP 7 — Instagram Feed Strip */
+    #insta { background:var(--espresso); }
+    .insta-heading {
+      font-family:var(--f-hand); font-size:clamp(1.5rem,3vw,2.2rem);
+      color:var(--amber); text-align:center; margin-bottom:48px; display:block;
+    }
+    .insta-row {
+      display:flex; gap:14px;
+    }
+    .insta-tile {
+      flex:1; aspect-ratio:1; border-radius:4px; overflow:hidden;
+      position:relative; cursor:pointer; min-width:0;
+      transition:transform .3s var(--ease-out);
+    }
+    .insta-tile:hover { transform:scale(1.04); z-index:2; }
+    .insta-thumb { width:100%; height:100%; display:block; }
+    .insta-tile-1 .insta-thumb { background:radial-gradient(ellipse at 30% 40%, #8B4020 0%, #4A1A08 50%, #241008 100%); }
+    .insta-tile-2 .insta-thumb { background:radial-gradient(ellipse at 65% 35%, #5A3018 0%, #C4783A 55%, #3B1A0A 100%); }
+    .insta-tile-3 .insta-thumb { background:radial-gradient(ellipse at 50% 60%, #D4904A 0%, #8B4A20 40%, #241408 100%); }
+    .insta-tile-4 .insta-thumb { background:radial-gradient(ellipse at 20% 70%, #6B3A1F 0%, #A05028 50%, #1C0E06 100%); }
+    .insta-tile-5 .insta-thumb { background:radial-gradient(ellipse at 75% 25%, #C47828 0%, #5A2A10 50%, #0F0804 100%); }
+    .insta-tile-6 .insta-thumb { background:radial-gradient(ellipse at 40% 55%, #7A4020 0%, #C4904A 45%, #3B1A0A 100%); }
+    .insta-blob {
+      position:absolute; border-radius:60% 40% 70% 30% / 40% 60% 40% 60%;
+      pointer-events:none;
+    }
+    .insta-overlay {
+      position:absolute; inset:0; background:rgba(28,14,6,0);
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+      transition:background .3s;
+    }
+    .insta-tile:hover .insta-overlay { background:rgba(91,51,23,.65); }
+    .insta-heart { font-size:1.5rem; opacity:0; transform:scale(.7); transition:opacity .25s, transform .25s; }
+    .insta-tile:hover .insta-heart { opacity:1; transform:scale(1); }
+    .insta-likes { font-family:var(--f-hand); font-size:.95rem; color:var(--cream); opacity:0; transition:opacity .25s .05s; }
+    .insta-tile:hover .insta-likes { opacity:1; }
+    @media(max-width:768px){
+      .insta-row { overflow-x:auto; -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory; padding-bottom:12px; flex-wrap:nowrap; }
+      .insta-tile { flex:0 0 calc(33.333% - 10px); scroll-snap-align:start; }
+    }
+    @media(max-width:480px){
+      .insta-tile { flex:0 0 calc(50% - 7px); }
+    }
+
+    /* STEP 8 — Testimonials */
+    #testimonials { background:var(--roast); }
+    .testi-track {
+      display:flex; gap:24px; overflow-x:auto; scroll-snap-type:x mandatory;
+      padding-bottom:20px; margin-top:48px;
+      -webkit-overflow-scrolling:touch; scrollbar-width:none;
+    }
+    .testi-track::-webkit-scrollbar { display:none; }
+    .testi-card {
+      flex:0 0 clamp(280px,44vw,460px); scroll-snap-align:start;
+      background:var(--coffee); border:1px solid rgba(196,168,130,.08);
+      border-radius:4px; padding:40px 36px;
+      box-shadow:4px 4px 0 rgba(196,168,130,.08);
+    }
+    .testi-stars { color:var(--accent-gold); font-size:1rem; letter-spacing:.1em; margin-bottom:20px; }
+    .testi-quote {
+      font-family:var(--f-bask); font-size:.95rem; font-style:italic;
+      color:var(--cream); line-height:1.8; margin-bottom:24px;
+    }
+    .testi-name { font-family:var(--f-hand); font-size:1.1rem; color:var(--amber); }
+    .testi-session { font-family:var(--f-mono); font-size:.52rem; letter-spacing:.2em; text-transform:uppercase; color:var(--tan); opacity:.6; display:block; margin-top:4px; }
+
+    /* STEP 9 — Booking Widget */
+    #booking { background:var(--espresso); }
+    .book-form { max-width:580px; margin:48px auto 0; }
+    .book-steps {
+      display:flex; align-items:center; gap:10px; margin-bottom:48px; justify-content:center;
+    }
+    .book-step-dot {
+      width:32px; height:32px; border-radius:50%; border:2px solid rgba(196,168,130,.3);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--f-mono); font-size:.62rem; color:rgba(196,168,130,.5);
+      transition:all .3s; flex-shrink:0;
+    }
+    .book-step-dot.active { background:var(--choco); border-color:var(--choco); color:var(--cream); }
+    .book-step-dot.done { background:var(--amber); border-color:var(--amber); color:var(--espresso); }
+    .book-step-line { flex:1; max-width:44px; height:1px; background:rgba(196,168,130,.18); }
+    .book-pane { display:none; }
+    .book-pane.active { display:block; animation:fade-up .35s var(--ease-out) forwards; }
+    .book-q { font-family:var(--f-head); font-size:1.15rem; color:var(--cream); margin-bottom:24px; }
+    .book-pills { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:32px; }
+    .book-pill {
+      font-family:var(--f-mono); font-size:.6rem; letter-spacing:.15em; text-transform:uppercase;
+      background:none; border:1px solid rgba(196,168,130,.22); color:rgba(196,168,130,.6);
+      padding:11px 22px; border-radius:99px; cursor:pointer; transition:all .25s;
+    }
+    .book-pill:hover { border-color:var(--amber); color:var(--amber); }
+    .book-pill.chosen { background:var(--choco); border-color:var(--choco); color:var(--cream); }
+    .book-input {
+      width:100%; background:rgba(196,168,130,.05); border:1px solid rgba(196,168,130,.15);
+      color:var(--cream); font-family:var(--f-body); font-size:.9rem;
+      padding:14px 18px; border-radius:2px; outline:none; margin-bottom:14px;
+      -webkit-appearance:none; appearance:none; transition:border-color .25s;
+    }
+    .book-input:focus { border-color:var(--amber); }
+    .book-input::placeholder { color:rgba(196,168,130,.35); }
+    .book-nav { display:flex; gap:12px; justify-content:flex-end; margin-top:8px; }
+    .book-back {
+      font-family:var(--f-mono); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase;
+      background:none; border:1px solid rgba(196,168,130,.18); color:rgba(196,168,130,.55);
+      padding:12px 22px; border-radius:2px; cursor:pointer; transition:all .25s;
+    }
+    .book-back:hover { border-color:var(--tan); color:var(--cream); }
+    .book-next {
+      font-family:var(--f-mono); font-size:.58rem; letter-spacing:.18em; text-transform:uppercase;
+      background:var(--amber); color:var(--espresso); font-weight:700;
+      padding:12px 28px; border-radius:2px; border:none; cursor:pointer; transition:all .25s;
+    }
+    .book-next:hover { background:var(--honey); }
+    .book-next:disabled { opacity:.3; cursor:not-allowed; }
+    .book-summary {
+      background:rgba(196,168,130,.05); border:1px solid rgba(196,168,130,.12);
+      border-radius:4px; padding:24px 28px; margin-bottom:24px;
+      box-shadow:3px 3px 0 rgba(196,168,130,.07);
+    }
+    .book-summary-row { display:flex; align-items:center; gap:12px; padding:5px 0; }
+    .book-summary-label { font-family:var(--f-mono); font-size:.52rem; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); width:80px; flex-shrink:0; }
+    .book-summary-val { font-family:var(--f-body); font-size:.88rem; color:var(--cream); }
+    .book-confirm-msg {
+      text-align:center; padding:56px 24px; display:none;
+      font-family:var(--f-hand); font-size:1.9rem; color:var(--amber); line-height:1.5;
+    }
+    @media(max-width:480px){
+      .book-pills { flex-direction:column; }
+      .book-pill { text-align:center; }
+    }
+
+    /* STEP 10 — Floating Book Now Button */
+    .float-book {
+      position:fixed; bottom:32px; right:24px; z-index:700;
+      display:inline-flex; align-items:center; gap:10px;
+      background:var(--choco); color:var(--cream);
+      padding:14px 24px; border-radius:99px; cursor:pointer; border:none;
+      font-family:var(--f-bask); font-size:.85rem;
+      box-shadow:3px 3px 0 var(--choco-light);
+      opacity:0; pointer-events:none; text-decoration:none;
+      transition:opacity .4s, background .25s, box-shadow .25s;
+    }
+    .float-book.visible { opacity:1; pointer-events:auto; animation:btn-bounce .5s var(--ease-out); }
+    .float-book:hover { background:var(--choco-light); box-shadow:3px 3px 0 var(--choco); color:var(--cream); }
+    @keyframes btn-bounce { 0%,100%{transform:translateY(0);} 40%{transform:translateY(-8px);} }
+
+    /* STEP 11 — Ambient Audio Toggle */
+    .float-audio {
+      position:fixed; bottom:32px; left:24px; z-index:700;
+      width:48px; height:48px; border-radius:50%;
+      background:var(--cream); border:1.5px solid var(--tan);
+      display:flex; align-items:center; justify-content:center;
+      cursor:pointer; color:var(--choco); box-shadow:2px 2px 0 var(--tan);
+      transition:background .25s;
+    }
+    .float-audio:hover { background:var(--latte); }
+
     /* ── FOOTER ── */
     #footer { background:var(--espresso); border-top:1px solid rgba(196,168,130,.07); padding:80px 24px 40px; }
     .foot-inner { max-width:1120px; margin:0 auto; }
@@ -437,7 +657,6 @@
       padding-bottom:60px; border-bottom:1px solid rgba(196,168,130,.07); margin-bottom:36px;
     }
     @media(max-width:768px){ .foot-top{grid-template-columns:1fr;gap:40px;} }
-    .foot-brand { }
     .foot-name { font-family:var(--f-display); font-size:1.5rem; font-weight:600; letter-spacing:.12em; color:var(--cream); margin-bottom:6px; }
     .foot-tag { font-family:var(--f-head); font-style:italic; font-size:.95rem; color:var(--tan); margin-bottom:20px; }
     .foot-desc { font-size:.82rem; color:rgba(196,168,130,.45); line-height:1.75; max-width:220px; }
@@ -473,7 +692,159 @@
       .pol{width:115px;padding:9px 9px 36px;}
       .pol:nth-child(n){transform:none;}
       #cta{padding:100px 20px;}
+      .float-book, .float-audio { bottom:20px; }
+      .float-book { right:16px; padding:12px 18px; font-size:.78rem; }
+      .float-audio { left:16px; }
+      /* pricing responsive */
+      .pricing-grid { grid-template-columns:1fr; gap:28px; }
+      .pricing-card:nth-child(1),
+      .pricing-card:nth-child(2),
+      .pricing-card:nth-child(3) { transform:none; }
     }
+
+    /* ── PRICING ── */
+    #pricing { background:var(--espresso); position:relative; overflow:visible; }
+
+    .pricing-eyebrow {
+      font-family:var(--f-hand); font-size:1.2rem; color:var(--amber);
+      transform:rotate(-1.5deg); display:inline-block; margin-bottom:12px;
+    }
+    .pricing-heading-wrap { position:relative; display:inline-block; margin-bottom:8px; }
+    .pricing-heading-wrap h2 {
+      font-family:var(--f-hand); font-size:clamp(2.4rem,5vw,3.8rem); font-weight:700;
+      color:var(--cream); transform:rotate(-1deg); display:inline-block; line-height:1.1;
+    }
+    .pricing-heading-deco-r {
+      position:absolute; top:-6px; right:-36px; font-size:1.8rem;
+      animation:spin-slow 8s linear infinite; display:inline-block;
+    }
+    .pricing-heading-deco-l {
+      position:absolute; bottom:-4px; left:-28px; font-size:1.5rem;
+      animation:spin-slow 10s linear infinite reverse; display:inline-block;
+    }
+    .pricing-underline {
+      position:absolute; bottom:-12px; left:50%; transform:translateX(-50%) rotate(-1deg);
+      width:180px; height:12px;
+      background:rgba(196,120,40,.2); border-radius:99px; filter:blur(3px);
+    }
+    .pricing-subtext {
+      font-family:var(--f-hand); font-size:1.1rem; color:var(--warm-mid);
+      transform:rotate(-1deg); display:inline-block; margin-top:20px;
+    }
+
+    .pricing-grid {
+      display:grid; grid-template-columns:repeat(3,1fr); gap:36px;
+      margin-top:64px; position:relative; z-index:2;
+    }
+
+    .pricing-card {
+      position:relative; transition:transform .3s var(--ease-out);
+    }
+    .pricing-card:nth-child(1) { transform:rotate(-1deg); }
+    .pricing-card:nth-child(2) { transform:rotate(1deg); }
+    .pricing-card:nth-child(3) { transform:rotate(-2deg); }
+
+    .pricing-card-inner {
+      position:relative; border-radius:12px; overflow:visible;
+    }
+    .pricing-card-bg {
+      position:absolute; inset:0; border-radius:12px;
+      background:var(--roast);
+      border:2px solid rgba(196,168,130,.25);
+      box-shadow:5px 5px 0 0 rgba(196,120,40,.35);
+      transition:box-shadow .3s var(--ease-out), transform .3s var(--ease-out);
+    }
+    .pricing-card:hover .pricing-card-bg {
+      box-shadow:9px 9px 0 0 rgba(196,120,40,.5);
+      transform:translate(-4px,-4px);
+    }
+
+    .pricing-card-body { position:relative; z-index:2; padding:28px; }
+
+    .pricing-popular-badge {
+      position:absolute; top:-14px; right:-10px;
+      background:var(--amber); color:var(--espresso);
+      font-family:var(--f-hand); font-size:.9rem; font-weight:700;
+      padding:5px 14px; border-radius:99px; transform:rotate(12deg);
+      border:2px solid var(--espresso);
+      box-shadow:2px 2px 0 0 var(--espresso);
+    }
+
+    .pricing-icon-ring {
+      width:52px; height:52px; border-radius:50%;
+      border:2px solid rgba(196,168,130,.3);
+      display:flex; align-items:center; justify-content:center;
+      font-size:1.5rem; margin-bottom:16px;
+      background:rgba(196,120,40,.06);
+    }
+
+    .pricing-card-name {
+      font-family:var(--f-hand); font-size:1.6rem; color:var(--cream);
+      margin-bottom:4px;
+    }
+    .pricing-card-desc {
+      font-family:var(--f-hand); font-size:1rem; color:var(--warm-mid);
+      margin-bottom:20px;
+    }
+    .pricing-price {
+      font-family:var(--f-hand); margin-bottom:24px;
+    }
+    .pricing-price .amount {
+      font-size:2.8rem; font-weight:700; color:var(--cream); line-height:1;
+    }
+    .pricing-price .currency {
+      font-size:1.3rem; color:var(--amber); margin-right:2px;
+    }
+    .pricing-price .period {
+      font-size:1rem; color:var(--warm-mid);
+    }
+
+    .pricing-features { list-style:none; margin-bottom:28px; display:flex; flex-direction:column; gap:12px; }
+    .pricing-features li {
+      display:flex; align-items:center; gap:12px;
+      font-family:var(--f-hand); font-size:1.05rem; color:var(--cream);
+    }
+    .pricing-check {
+      width:22px; height:22px; border-radius:50%; flex-shrink:0;
+      border:2px solid rgba(196,168,130,.35);
+      display:flex; align-items:center; justify-content:center;
+      color:var(--amber); font-size:.7rem; font-weight:700;
+    }
+
+    .pricing-btn {
+      width:100%; padding:14px; border-radius:8px;
+      font-family:var(--f-hand); font-size:1.1rem; font-weight:700;
+      cursor:pointer; border:2px solid rgba(196,168,130,.3);
+      box-shadow:4px 4px 0 0 rgba(196,120,40,.3);
+      transition:all .25s var(--ease-out);
+      text-transform:none; letter-spacing:0;
+      display:block; text-decoration:none; text-align:center;
+    }
+    .pricing-btn:hover {
+      box-shadow:6px 6px 0 0 rgba(196,120,40,.5);
+      transform:translate(-2px,-2px);
+    }
+    .pricing-btn-default {
+      background:rgba(196,120,40,.08); color:var(--cream);
+    }
+    .pricing-btn-default:hover { background:rgba(196,120,40,.15); }
+    .pricing-btn-popular {
+      background:var(--amber); color:var(--espresso);
+      border-color:var(--amber);
+      box-shadow:4px 4px 0 0 var(--espresso);
+    }
+    .pricing-btn-popular:hover {
+      background:var(--honey); box-shadow:6px 6px 0 0 var(--espresso);
+    }
+
+    .pricing-deco {
+      position:absolute; pointer-events:none; z-index:0;
+      font-family:var(--f-hand); color:rgba(196,120,40,.08);
+    }
+    .pricing-deco-tl { font-size:5rem; top:40px; left:24px; transform:rotate(12deg); }
+    .pricing-deco-br { font-size:4rem; bottom:60px; right:32px; transform:rotate(-12deg); }
+
+    @keyframes spin-slow { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
   </style>
 </head>
 <body>
@@ -494,11 +865,29 @@
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#activities">Activities</a></li>
+    <li><a href="#pricing">Pricing</a></li>
     <li><a href="#menu">Menu</a></li>
     <li><a href="#gallery">Gallery</a></li>
-    <li><a href="#cta" class="nav-cta">Visit Us</a></li>
+    <li><a href="#faq">FAQ</a></li>
+    <li><a href="#booking" class="nav-cta">Book Now</a></li>
   </ul>
+  <!-- STEP 12 — Hamburger -->
+  <button class="nav-burger" id="nav-burger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+<!-- STEP 12 — Mobile nav dropdown -->
+<div class="nav-mobile" id="nav-mobile">
+  <a href="#about">About</a>
+  <a href="#activities">Activities</a>
+  <a href="#pricing">Pricing</a>
+  <a href="#menu">Menu</a>
+  <a href="#gallery">Gallery</a>
+  <a href="#faq">FAQ</a>
+  <a href="#testimonials">Reviews</a>
+  <a href="#booking">Book a Session</a>
+  <a href="#cta">Visit Us</a>
+</div>
 
 <!-- HERO -->
 <section id="hero">
@@ -521,46 +910,29 @@
       <div class="cup-glow"></div>
       <div class="cup-float">
         <svg viewBox="0 0 280 300" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;overflow:visible;">
-          <!-- Steam -->
           <g transform="translate(0,-10)">
             <path class="steam-p" d="M100,65 Q93,44 103,22 Q110,6 98,-4" stroke="rgba(245,236,215,.55)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
             <path class="steam-p" d="M140,58 Q133,36 143,14 Q150,-2 139,-14" stroke="rgba(245,236,215,.55)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
             <path class="steam-p" d="M180,65 Q173,44 183,22 Q190,6 179,-4" stroke="rgba(245,236,215,.55)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
           </g>
-          <!-- Saucer shadow -->
           <ellipse cx="140" cy="278" rx="95" ry="12" fill="rgba(0,0,0,.45)"/>
-          <!-- Saucer -->
           <ellipse cx="140" cy="272" rx="105" ry="14" fill="#1A0E07"/>
           <ellipse cx="140" cy="269" rx="96" ry="11" fill="#241408"/>
           <ellipse cx="140" cy="267" rx="84" ry="8" fill="#1A0E07"/>
           <ellipse cx="140" cy="266" rx="48" ry="5" fill="#140A04"/>
-          <!-- Cup body -->
-          <path d="M52,92 L228,92 L206,252 H74 Z" fill="#241608" rx="4"/>
-          <!-- Left shade -->
+          <path d="M52,92 L228,92 L206,252 H74 Z" fill="#241608"/>
           <path d="M52,92 L80,92 L66,252 H52 Z" fill="rgba(0,0,0,.28)"/>
-          <!-- Right shade -->
           <path d="M228,92 L200,92 L214,252 H228 Z" fill="rgba(0,0,0,.2)"/>
-          <!-- Reflection -->
           <path d="M68,112 Q75,185 70,245" stroke="rgba(245,236,215,.05)" stroke-width="14" fill="none" stroke-linecap="round"/>
-          <!-- Cup rim outer -->
           <ellipse cx="140" cy="92" rx="88" ry="13" fill="#3A1E0C"/>
-          <!-- Cup rim inner -->
           <ellipse cx="140" cy="92" rx="80" ry="11" fill="#5A3018"/>
-          <!-- Coffee surface -->
           <ellipse cx="140" cy="92" rx="74" ry="9" fill="#8A4822"/>
-          <!-- Coffee inner -->
           <ellipse cx="140" cy="91" rx="68" ry="7.5" fill="#6A3416"/>
-          <!-- Latte art heart left -->
           <path d="M114,89 Q114,80 122,80 Q130,80 130,89 Q130,98 114,108 Q114,98 114,89Z" fill="rgba(245,236,215,.82)"/>
-          <!-- Latte art heart right -->
           <path d="M130,89 Q130,80 138,80 Q146,80 146,89 Q146,98 130,108 Q130,98 130,89Z" fill="rgba(245,236,215,.82)"/>
-          <!-- Heart tip -->
           <path d="M114,108 Q130,120 146,108" stroke="rgba(245,236,215,.5)" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <!-- Handle outer -->
           <path d="M206,128 Q256,128 256,168 Q256,208 206,208" stroke="#1E1008" stroke-width="22" fill="none" stroke-linecap="round"/>
-          <!-- Handle inner highlight -->
           <path d="M206,132 Q248,132 248,168 Q248,204 206,204" stroke="#2D1810" stroke-width="14" fill="none" stroke-linecap="round"/>
-          <!-- Rim highlight -->
           <ellipse cx="118" cy="86" rx="20" ry="4" fill="rgba(245,236,215,.1)" transform="rotate(-8 118 86)"/>
         </svg>
       </div>
@@ -637,7 +1009,6 @@
   </div>
 </section>
 
-<!-- wave divider -->
 <svg class="sec-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--roast);">
   <path d="M0,30 C360,60 720,0 1080,38 C1260,54 1380,22 1440,30 L1440,60 L0,60 Z" fill="var(--espresso)"/>
 </svg>
@@ -693,8 +1064,104 @@
   </div>
 </section>
 
-<!-- wave -->
 <svg class="sec-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--espresso);">
+  <path d="M0,20 C480,60 960,0 1440,40 L1440,60 L0,60 Z" fill="var(--coffee)"/>
+</svg>
+
+<!-- PRICING -->
+<section id="pricing" class="sec" style="background:var(--coffee);">
+  <div class="pricing-deco pricing-deco-tl">✎</div>
+  <div class="pricing-deco pricing-deco-br">✏️</div>
+  <div class="ctr" style="text-align:center; position:relative; z-index:2;">
+    <div class="rv" style="display:flex; flex-direction:column; align-items:center;">
+      <span class="pricing-eyebrow">Simple Pricing</span>
+      <div class="pricing-heading-wrap">
+        <h2>Choose Your <em style="font-style:normal;">Experience</em></h2>
+        <span class="pricing-heading-deco-r">✨</span>
+        <span class="pricing-heading-deco-l">⭐</span>
+        <div class="pricing-underline"></div>
+      </div>
+      <p class="pricing-subtext">Paint, sip, and create — pick the session that's right for you</p>
+    </div>
+
+    <div class="pricing-grid rv rv-d1">
+
+      <!-- Tier 1: Tiny Starter -->
+      <div class="pricing-card">
+        <div class="pricing-card-inner">
+          <div class="pricing-card-bg"></div>
+          <div class="pricing-card-body">
+            <div class="pricing-icon-ring">🖼️</div>
+            <div class="pricing-card-name">The Tiny Starter</div>
+            <div class="pricing-card-desc">Perfect for first-time painters</div>
+            <div class="pricing-price">
+              <span class="currency">AED</span><span class="amount">45</span>
+              <span class="period"> / session</span>
+            </div>
+            <ul class="pricing-features">
+              <li><span class="pricing-check">✓</span> Mini Canvas (20×20 cm)</li>
+              <li><span class="pricing-check">✓</span> Full Painting Palette</li>
+              <li><span class="pricing-check">✓</span> Artist Guidance Included</li>
+              <li><span class="pricing-check">✓</span> Take Your Artwork Home</li>
+            </ul>
+            <a href="#booking" class="pricing-btn pricing-btn-default">Book This Session</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier 2: Masterpiece Bundle (popular) -->
+      <div class="pricing-card">
+        <div class="pricing-card-inner">
+          <div class="pricing-card-bg" style="border-color:rgba(196,120,40,.5); box-shadow:5px 5px 0 0 var(--amber);"></div>
+          <div class="pricing-popular-badge">Popular!</div>
+          <div class="pricing-card-body">
+            <div class="pricing-icon-ring" style="border-color:rgba(196,120,40,.5);">🎨</div>
+            <div class="pricing-card-name">Masterpiece Bundle</div>
+            <div class="pricing-card-desc">The full creative experience</div>
+            <div class="pricing-price">
+              <span class="currency">AED</span><span class="amount">85</span>
+              <span class="period"> / session</span>
+            </div>
+            <ul class="pricing-features">
+              <li><span class="pricing-check">✓</span> Medium Canvas (50×50 cm)</li>
+              <li><span class="pricing-check">✓</span> Full Painting Palette</li>
+              <li><span class="pricing-check">✓</span> Any Drink of Your Choice</li>
+              <li><span class="pricing-check">✓</span> Artist Guidance Included</li>
+              <li><span class="pricing-check">✓</span> Take Your Artwork Home</li>
+            </ul>
+            <a href="#booking" class="pricing-btn pricing-btn-popular">Book This Session</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tier 3: Sculpt'n Paint -->
+      <div class="pricing-card">
+        <div class="pricing-card-inner">
+          <div class="pricing-card-bg"></div>
+          <div class="pricing-card-body">
+            <div class="pricing-icon-ring">🏺</div>
+            <div class="pricing-card-name">Sculpt'n Paint</div>
+            <div class="pricing-card-desc">Ceramics — a hands-on masterpiece</div>
+            <div class="pricing-price">
+              <span class="currency">AED</span><span class="amount">120</span>
+              <span class="period"> / session</span>
+            </div>
+            <ul class="pricing-features">
+              <li><span class="pricing-check">✓</span> Ceramic Clay from Scratch</li>
+              <li><span class="pricing-check">✓</span> Paint & Glaze Included</li>
+              <li><span class="pricing-check">✓</span> Professional Kiln Firing</li>
+              <li><span class="pricing-check">✓</span> Collect Your Piece in 3 Days</li>
+            </ul>
+            <a href="#booking" class="pricing-btn pricing-btn-default">Book This Session</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<svg class="sec-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--coffee);">
   <path d="M0,20 C480,60 960,0 1440,40 L1440,60 L0,60 Z" fill="var(--roast)"/>
 </svg>
 
@@ -713,6 +1180,7 @@
       </div>
 
       <div class="rv rv-d2">
+        <!-- STEP 4 — menu items match fallback data (pricing file had no café data) -->
         <div class="menu-panel active" id="panel-coffee">
           <p class="menu-board-title">Coffee &amp; Hot Drinks</p>
           <div class="menu-item"><span class="menu-name">Signature Latte</span><span class="menu-dots"></span><span class="menu-price">25 AED</span></div>
@@ -737,7 +1205,38 @@
   </div>
 </section>
 
-<!-- wave -->
+<!-- STEP 6 — FAQ Accordion (immediately after menu closing tag) -->
+<section id="faq" class="sec">
+  <div class="ctr">
+    <div class="rv">
+      <div class="sec-label">Got Questions</div>
+      <h2 class="sec-title">Things people<br><em>ask us.</em></h2>
+    </div>
+    <div class="faq-list rv rv-d1" id="faq-list">
+      <div class="faq-item">
+        <button class="faq-q"><span>Do I need any painting experience?</span><span class="faq-toggle">+</span></button>
+        <div class="faq-a"><p class="faq-a-inner">Not at all. Our sessions are designed for complete beginners and seasoned artists alike. Our instructors guide you every step of the way.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>What is included in a session?</span><span class="faq-toggle">+</span></button>
+        <div class="faq-a"><p class="faq-a-inner">All materials are provided — canvas, paints, brushes, and an apron. Your chosen drink from our menu is also included in guided sessions.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>Can I bring my own food or drinks?</span><span class="faq-toggle">+</span></button>
+        <div class="faq-a"><p class="faq-a-inner">You are welcome to enjoy anything from our café menu. Outside food and beverages are not permitted inside the studio.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>How do I book a private event?</span><span class="faq-toggle">+</span></button>
+        <div class="faq-a"><p class="faq-a-inner">Use the booking form on this page and select Private Event, or reach out to us directly via Instagram or email and we will arrange everything for you.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q"><span>What is your cancellation policy?</span><span class="faq-toggle">+</span></button>
+        <div class="faq-a"><p class="faq-a-inner">We ask for at least 24 hours notice for cancellations. Bookings cancelled within 24 hours are non-refundable but can be rescheduled once.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
 <svg class="sec-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--roast);">
   <path d="M0,40 C320,0 800,60 1440,24 L1440,60 L0,60 Z" fill="var(--espresso)"/>
 </svg>
@@ -776,9 +1275,6 @@
             <ellipse cx="80" cy="62" rx="44" ry="9" fill="#C4904A"/>
             <path d="M60,60 Q60,51 68,51 Q80,51 80,60 Q80,51 92,51 Q100,51 100,60 Q100,70 80,80 Q60,70 60,60Z" fill="#F5ECD7" opacity=".88"/>
             <path d="M115,78 Q148,78 148,98 Q148,118 115,118" stroke="#6B3A1F" stroke-width="9" fill="none" stroke-linecap="round"/>
-            <path d="M55,54 Q59,44 55,30" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>
-            <path d="M80,50 Q84,38 80,22" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>
-            <path d="M105,54 Q109,44 105,30" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>
           </svg>
           <span class="pol-label">Latte art ☕</span>
         </div>
@@ -786,7 +1282,6 @@
         <div class="pol">
           <svg class="pol-art" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
             <rect width="160" height="160" fill="#EDE0CC"/>
-            <ellipse cx="80" cy="150" rx="46" ry="8" fill="#3B1A0A" opacity=".1"/>
             <path d="M46,50 Q36,74 35,104 Q35,136 80,138 Q125,136 125,104 Q124,74 114,50 Z" fill="#C4783A"/>
             <ellipse cx="80" cy="50" rx="34" ry="11" fill="#D4904A"/>
             <ellipse cx="80" cy="46" rx="26" ry="8" fill="#8B4520"/>
@@ -804,7 +1299,6 @@
             <path d="M18,48 Q52,28 88,52 Q124,78 148,46" stroke="#C4503A" stroke-width="11" fill="none" stroke-linecap="round"/>
             <path d="M16,80 Q58,54 100,80 Q130,100 148,70" stroke="#D4902A" stroke-width="9" fill="none" stroke-linecap="round"/>
             <path d="M20,112 Q65,88 108,114 Q134,130 148,108" stroke="#8B4020" stroke-width="8" fill="none" stroke-linecap="round"/>
-            <path d="M18,138 Q70,120 122,140 Q140,146 150,134" stroke="#C4783A" stroke-width="6" fill="none" stroke-linecap="round"/>
           </svg>
           <span class="pol-label">Brushstroke art 🖌️</span>
         </div>
@@ -828,7 +1322,6 @@
   </div>
 </section>
 
-<!-- wave -->
 <svg class="sec-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--espresso);">
   <path d="M0,24 C480,60 960,4 1440,38 L1440,60 L0,60 Z" fill="var(--coffee)"/>
 </svg>
@@ -840,14 +1333,168 @@
     <span class="cta-eyebrow">Ready to create?</span>
     <h2 class="cta-title">Come paint<br><em>with us.</em></h2>
     <p class="cta-sub">No experience needed — just bring your curiosity and we'll handle the rest.</p>
-    <a href="#footer" class="btn-p">Find Us in Abu Dhabi →</a>
+    <a href="#booking" class="btn-p">Reserve Your Spot →</a>
   </div>
 </section>
 
-<!-- wave -->
 <svg class="sec-wave" viewBox="0 0 1440 48" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--coffee);">
   <path d="M0,24 C320,48 960,0 1440,28 L1440,48 L0,48 Z" fill="var(--espresso)"/>
 </svg>
+
+<!-- STEP 7 — Instagram Feed Strip (immediately above footer, above testimonials) -->
+<section id="insta" class="sec">
+  <div class="ctr">
+    <a href="https://instagram.com/tinycanvascafe" target="_blank" rel="noopener" style="text-decoration:none;display:block;">
+      <span class="insta-heading">Find us on Instagram @tinycanvascafe</span>
+      <div class="insta-row">
+        <div class="insta-tile insta-tile-1">
+          <div class="insta-thumb"></div>
+          <div class="insta-blob" style="width:55%;height:55%;top:15%;left:22%;background:rgba(196,120,40,.25);"></div>
+          <div class="insta-overlay"><span class="insta-heart">♥</span><span class="insta-likes">246 likes</span></div>
+        </div>
+        <div class="insta-tile insta-tile-2">
+          <div class="insta-thumb"></div>
+          <div class="insta-blob" style="width:60%;height:60%;top:10%;left:18%;background:rgba(212,144,74,.2);border-radius:40% 60% 50% 50% / 60% 40% 60% 40%;"></div>
+          <div class="insta-overlay"><span class="insta-heart">♥</span><span class="insta-likes">189 likes</span></div>
+        </div>
+        <div class="insta-tile insta-tile-3">
+          <div class="insta-thumb"></div>
+          <div class="insta-blob" style="width:50%;height:65%;top:20%;left:25%;background:rgba(139,90,60,.3);border-radius:70% 30% 40% 60% / 40% 70% 30% 60%;"></div>
+          <div class="insta-overlay"><span class="insta-heart">♥</span><span class="insta-likes">312 likes</span></div>
+        </div>
+        <div class="insta-tile insta-tile-4">
+          <div class="insta-thumb"></div>
+          <div class="insta-blob" style="width:58%;height:52%;top:18%;left:20%;background:rgba(196,120,40,.22);border-radius:50% 50% 60% 40% / 50% 60% 40% 50%;"></div>
+          <div class="insta-overlay"><span class="insta-heart">♥</span><span class="insta-likes">274 likes</span></div>
+        </div>
+        <div class="insta-tile insta-tile-5">
+          <div class="insta-thumb"></div>
+          <div class="insta-blob" style="width:62%;height:58%;top:12%;left:16%;background:rgba(232,168,80,.18);border-radius:30% 70% 50% 50% / 50% 30% 70% 50%;"></div>
+          <div class="insta-overlay"><span class="insta-heart">♥</span><span class="insta-likes">401 likes</span></div>
+        </div>
+        <div class="insta-tile insta-tile-6">
+          <div class="insta-thumb"></div>
+          <div class="insta-blob" style="width:54%;height:60%;top:16%;left:22%;background:rgba(160,80,40,.28);border-radius:60% 40% 30% 70% / 40% 50% 60% 30%;"></div>
+          <div class="insta-overlay"><span class="insta-heart">♥</span><span class="insta-likes">158 likes</span></div>
+        </div>
+      </div>
+    </a>
+  </div>
+</section>
+
+<svg class="sec-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--espresso);">
+  <path d="M0,30 C360,0 900,60 1440,20 L1440,60 L0,60 Z" fill="var(--roast)"/>
+</svg>
+
+<!-- STEP 8 — Testimonials Carousel (immediately after Instagram strip) -->
+<section id="testimonials" class="sec">
+  <div class="ctr">
+    <div class="rv">
+      <div class="sec-label">What People Say</div>
+      <h2 class="sec-title">Straight from<br><em>our guests.</em></h2>
+    </div>
+    <div class="testi-track rv rv-d1" id="testi-track">
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"I came in knowing nothing about painting and left with something I actually hung on my wall. The whole vibe was just so relaxing."</p>
+        <span class="testi-name">Fatima A.</span>
+        <span class="testi-session">Open Studio</span>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"We booked a private session for my friend's birthday and it was genuinely the best night out we've had in Abu Dhabi. Highly recommend."</p>
+        <span class="testi-name">Sara K.</span>
+        <span class="testi-session">Private Event</span>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"The Spanish Latte alone is worth the visit. The painting is a bonus. Will be back every week."</p>
+        <span class="testi-name">Reem M.</span>
+        <span class="testi-session">Guided Painting</span>
+      </div>
+      <div class="testi-card">
+        <div class="testi-stars">★★★★★</div>
+        <p class="testi-quote">"As someone who paints regularly, I was surprised by how much I enjoyed the guided session. Great instructor, great atmosphere."</p>
+        <span class="testi-name">Layla H.</span>
+        <span class="testi-session">Guided Painting</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="sec-wave" viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--roast);">
+  <path d="M0,20 C480,60 960,0 1440,40 L1440,60 L0,60 Z" fill="var(--espresso)"/>
+</svg>
+
+<!-- STEP 9 — Booking Widget (immediately before footer) -->
+<section id="booking" class="sec">
+  <div class="ctr">
+    <div class="rv">
+      <div class="sec-label">Reserve Your Spot</div>
+      <h2 class="sec-title">Reserve<br><em>Your Spot</em></h2>
+    </div>
+    <div class="book-form">
+      <!-- Step indicator -->
+      <div class="book-steps">
+        <div class="book-step-dot active" id="step-dot-1">1</div>
+        <div class="book-step-line"></div>
+        <div class="book-step-dot" id="step-dot-2">2</div>
+        <div class="book-step-line"></div>
+        <div class="book-step-dot" id="step-dot-3">3</div>
+      </div>
+
+      <!-- Pane 1: Session Type -->
+      <div class="book-pane active" id="book-pane-1">
+        <p class="book-q">What kind of session are you booking?</p>
+        <div class="book-pills">
+          <button class="book-pill" data-val="Open Studio">Open Studio</button>
+          <button class="book-pill" data-val="Guided Painting">Guided Painting</button>
+          <button class="book-pill" data-val="Private Event">Private Event</button>
+        </div>
+        <div class="book-nav">
+          <button class="book-next" id="book-next-1" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- Pane 2: Date & Time -->
+      <div class="book-pane" id="book-pane-2">
+        <p class="book-q">When would you like to come in?</p>
+        <input type="date" class="book-input" id="book-date" placeholder="Select a date">
+        <div class="book-pills" style="margin-top:8px;">
+          <button class="book-pill" data-val="Morning 10am">Morning 10am</button>
+          <button class="book-pill" data-val="Afternoon 2pm">Afternoon 2pm</button>
+          <button class="book-pill" data-val="Evening 6pm">Evening 6pm</button>
+        </div>
+        <div class="book-nav">
+          <button class="book-back" id="book-back-2">← Back</button>
+          <button class="book-next" id="book-next-2" disabled>Next →</button>
+        </div>
+      </div>
+
+      <!-- Pane 3: Details -->
+      <div class="book-pane" id="book-pane-3">
+        <div class="book-summary">
+          <div class="book-summary-row"><span class="book-summary-label">Session</span><span class="book-summary-val" id="sum-session">—</span></div>
+          <div class="book-summary-row"><span class="book-summary-label">Date</span><span class="book-summary-val" id="sum-date">—</span></div>
+          <div class="book-summary-row"><span class="book-summary-label">Time</span><span class="book-summary-val" id="sum-time">—</span></div>
+        </div>
+        <p class="book-q" style="margin-bottom:16px;">Your details</p>
+        <input type="text" class="book-input" id="book-name" placeholder="Full Name">
+        <input type="text" class="book-input" id="book-contact" placeholder="Phone or Email">
+        <div class="book-nav">
+          <button class="book-back" id="book-back-3">← Back</button>
+          <!-- TODO: wire up real backend — console.log used for now, replace with fetch/form submit -->
+          <button class="book-next" id="book-submit">Confirm My Spot ✓</button>
+        </div>
+      </div>
+
+      <!-- Confirmation message -->
+      <div class="book-confirm-msg" id="book-confirm">
+        We can't wait to paint with you!<br>See you soon. ☕
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- FOOTER -->
 <footer id="footer">
@@ -871,6 +1518,7 @@
           <a href="#activities">Activities</a>
           <a href="#menu">Our Menu</a>
           <a href="#gallery">Gallery</a>
+          <a href="#faq">FAQ</a>
         </div>
         <div class="foot-col">
           <span class="foot-col-label">Follow Along</span>
@@ -893,6 +1541,20 @@
   </div>
 </footer>
 
+<!-- STEP 10 — Floating Book Now Button -->
+<a href="#booking" class="float-book" id="float-book">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+  Book Now
+</a>
+
+<!-- STEP 11 — Ambient Audio Toggle -->
+<!-- Replace src with a real café ambient audio file URL -->
+<audio id="cafe-audio" loop src=""></audio>
+<button class="float-audio" id="audio-btn" aria-label="Toggle ambient sound">
+  <svg id="audio-icon-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+  <svg id="audio-icon-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+</button>
+
 <script>
 // ── CUSTOM CURSOR ──
 const dot  = document.getElementById('cur-dot');
@@ -913,7 +1575,7 @@ document.addEventListener('mousemove', e => {
   requestAnimationFrame(animRing);
 })();
 
-document.querySelectorAll('a,button,.pol,.act-card,.about-card').forEach(el => {
+document.querySelectorAll('a,button,.pol,.act-card,.about-card,.faq-item,.testi-card,.insta-tile').forEach(el => {
   el.addEventListener('mouseenter', () => {
     dot.style.width  = dot.style.height  = '14px';
     ring.style.width = ring.style.height = '52px';
@@ -938,7 +1600,6 @@ document.querySelectorAll('a,button,.pol,.act-card,.about-card').forEach(el => {
   const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
   camera.position.z = 14;
 
-  // Lights
   scene.add(new THREE.AmbientLight(0x7A4020, 0.9));
   const wl = new THREE.PointLight(0xC47828, 2.8, 50);
   wl.position.set(6, 8, 8);
@@ -947,70 +1608,50 @@ document.querySelectorAll('a,button,.pol,.act-card,.about-card').forEach(el => {
   fl.position.set(-8, -4, 5);
   scene.add(fl);
 
-  // Bean geometry (squished sphere)
   const bGeo = new THREE.SphereGeometry(0.32, 10, 7);
   bGeo.scale(1, 1.65, 0.6);
 
   const browns = [0x2D1508,0x3B1A0A,0x4A2210,0x5A2E14,0x6B3A1F,0x7A4828];
   const beans = [];
-  const COUNT = 55;
 
-  for (let i = 0; i < COUNT; i++) {
+  for (let i = 0; i < 55; i++) {
     const mat = new THREE.MeshPhongMaterial({
       color: browns[i % browns.length],
       shininess: 38,
       specular: new THREE.Color(0.2, 0.1, 0.04)
     });
     const mesh = new THREE.Mesh(bGeo, mat);
-    mesh.position.set(
-      (Math.random() - .5) * 34,
-      (Math.random() - .5) * 22,
-      (Math.random() - .5) * 10 - 3
-    );
-    mesh.rotation.set(
-      Math.random() * Math.PI * 2,
-      Math.random() * Math.PI * 2,
-      Math.random() * Math.PI * 2
-    );
+    mesh.position.set((Math.random()-.5)*34,(Math.random()-.5)*22,(Math.random()-.5)*10-3);
+    mesh.rotation.set(Math.random()*Math.PI*2,Math.random()*Math.PI*2,Math.random()*Math.PI*2);
     scene.add(mesh);
-    beans.push({
-      mesh,
-      speed:  0.006 + Math.random() * 0.016,
-      rx:     (Math.random() - .5) * .014,
-      rz:     (Math.random() - .5) * .009
-    });
+    beans.push({ mesh, speed:0.006+Math.random()*0.016, rx:(Math.random()-.5)*.014, rz:(Math.random()-.5)*.009 });
   }
 
-  // Mouse parallax
   let tx = 0, ty = 0;
   document.addEventListener('mousemove', e => {
-    tx = (e.clientX / window.innerWidth  - .5) * 2.2;
-    ty = -(e.clientY / window.innerHeight - .5) * 1.4;
+    tx = (e.clientX/window.innerWidth-.5)*2.2;
+    ty = -(e.clientY/window.innerHeight-.5)*1.4;
   });
 
   let f = 0;
-  function loop() {
+  (function loop() {
     f++;
     requestAnimationFrame(loop);
-    camera.position.x += (tx - camera.position.x) * .04;
-    camera.position.y += (ty - camera.position.y) * .04;
+    camera.position.x += (tx-camera.position.x)*.04;
+    camera.position.y += (ty-camera.position.y)*.04;
     beans.forEach(b => {
       b.mesh.position.y += b.speed;
       b.mesh.rotation.x += b.rx;
       b.mesh.rotation.z += b.rz;
-      if (b.mesh.position.y > 13) {
-        b.mesh.position.y = -13;
-        b.mesh.position.x = (Math.random() - .5) * 34;
-      }
+      if (b.mesh.position.y > 13) { b.mesh.position.y = -13; b.mesh.position.x = (Math.random()-.5)*34; }
     });
-    wl.position.x = Math.sin(f * .005) * 7;
-    wl.position.y = Math.cos(f * .003) * 4 + 5;
+    wl.position.x = Math.sin(f*.005)*7;
+    wl.position.y = Math.cos(f*.003)*4+5;
     renderer.render(scene, camera);
-  }
-  loop();
+  })();
 
   window.addEventListener('resize', () => {
-    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.aspect = window.innerWidth/window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
   });
@@ -1027,16 +1668,16 @@ document.querySelectorAll('a,button,.pol,.act-card,.about-card').forEach(el => {
   let ang = 0;
   (function draw() {
     requestAnimationFrame(draw);
-    ctx.clearRect(0, 0, cv.width, cv.height);
+    ctx.clearRect(0,0,cv.width,cv.height);
     ang += .004;
-    const cx = cv.width / 2, cy = cv.height / 2;
-    [[Math.cos(ang)*220, Math.sin(ang*.7)*110, 280, 'rgba(196,120,40,.12)'],
-     [Math.cos(ang+Math.PI)*190, Math.sin(ang*.5+1)*90, 210, 'rgba(212,144,74,.08)'],
-     [Math.cos(ang*.6)*160, Math.sin(ang*1.2)*70, 180, 'rgba(232,168,80,.06)']
-    ].forEach(([ox, oy, r, c]) => {
-      const g = ctx.createRadialGradient(cx+ox, cy+oy, 0, cx+ox, cy+oy, r);
-      g.addColorStop(0, c); g.addColorStop(1, 'transparent');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, cv.width, cv.height);
+    const cx = cv.width/2, cy = cv.height/2;
+    [[Math.cos(ang)*220,Math.sin(ang*.7)*110,280,'rgba(196,120,40,.12)'],
+     [Math.cos(ang+Math.PI)*190,Math.sin(ang*.5+1)*90,210,'rgba(212,144,74,.08)'],
+     [Math.cos(ang*.6)*160,Math.sin(ang*1.2)*70,180,'rgba(232,168,80,.06)']
+    ].forEach(([ox,oy,r,c]) => {
+      const g = ctx.createRadialGradient(cx+ox,cy+oy,0,cx+ox,cy+oy,r);
+      g.addColorStop(0,c); g.addColorStop(1,'transparent');
+      ctx.fillStyle=g; ctx.fillRect(0,0,cv.width,cv.height);
     });
   })();
 })();
@@ -1045,15 +1686,15 @@ document.querySelectorAll('a,button,.pol,.act-card,.about-card').forEach(el => {
 const prog = document.getElementById('prog');
 const nav  = document.getElementById('nav');
 window.addEventListener('scroll', () => {
-  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
-  prog.style.width = pct + '%';
+  const pct = window.scrollY/(document.documentElement.scrollHeight-window.innerHeight)*100;
+  prog.style.width = pct+'%';
   nav.classList.toggle('scrolled', window.scrollY > 80);
-}, { passive: true });
+}, { passive:true });
 
 // ── SCROLL REVEAL ──
 const io = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-}, { threshold: 0.12 });
+}, { threshold:0.12 });
 document.querySelectorAll('.rv').forEach(el => io.observe(el));
 
 // ── MENU TABS ──
@@ -1062,7 +1703,7 @@ document.querySelectorAll('.menu-tab').forEach(tab => {
     document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
     tab.classList.add('active');
-    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    document.getElementById('panel-'+tab.dataset.tab).classList.add('active');
   });
 });
 
@@ -1071,9 +1712,164 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
     const t = document.querySelector(a.getAttribute('href'));
-    if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 72, behavior: 'smooth' });
+    if (t) window.scrollTo({ top:t.getBoundingClientRect().top+window.scrollY-72, behavior:'smooth' });
   });
 });
+
+// STEP 6 — FAQ accordion (single event listener on container)
+document.getElementById('faq-list').addEventListener('click', e => {
+  const btn = e.target.closest('.faq-q');
+  if (!btn) return;
+  const item = btn.closest('.faq-item');
+  const isOpen = item.classList.contains('open');
+  // close all
+  document.querySelectorAll('.faq-item.open').forEach(el => {
+    el.classList.remove('open');
+    el.querySelector('.faq-toggle').textContent = '+';
+  });
+  // open clicked if it was closed
+  if (!isOpen) {
+    item.classList.add('open');
+    btn.querySelector('.faq-toggle').textContent = '−';
+  }
+});
+
+// STEP 8 — Testimonials auto-scroll
+(function() {
+  const track = document.getElementById('testi-track');
+  if (!track) return;
+  let timer;
+  function startScroll() {
+    timer = setInterval(() => {
+      const cards = track.querySelectorAll('.testi-card');
+      if (!cards.length) return;
+      const cardW = cards[0].offsetWidth + 24;
+      const maxScroll = track.scrollWidth - track.clientWidth;
+      if (track.scrollLeft >= maxScroll - 10) {
+        track.scrollTo({ left:0, behavior:'smooth' });
+      } else {
+        track.scrollBy({ left:cardW, behavior:'smooth' });
+      }
+    }, 4000);
+  }
+  startScroll();
+  track.addEventListener('mouseenter', () => clearInterval(timer));
+  track.addEventListener('mouseleave', startScroll);
+})();
+
+// STEP 9 — Booking widget
+(function() {
+  let bookData = { session:'', date:'', time:'' };
+
+  function goStep(n) {
+    document.querySelectorAll('.book-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.book-step-dot').forEach((d,i) => {
+      d.classList.toggle('active', i+1 === n);
+      d.classList.toggle('done', i+1 < n);
+    });
+    const pane = document.getElementById('book-pane-'+n);
+    if (pane) pane.classList.add('active');
+  }
+
+  // Session pills
+  document.querySelectorAll('#book-pane-1 .book-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#book-pane-1 .book-pill').forEach(p => p.classList.remove('chosen'));
+      pill.classList.add('chosen');
+      bookData.session = pill.dataset.val;
+      document.getElementById('book-next-1').disabled = false;
+    });
+  });
+  document.getElementById('book-next-1').addEventListener('click', () => goStep(2));
+
+  // Time pills (pane 2)
+  document.querySelectorAll('#book-pane-2 .book-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      document.querySelectorAll('#book-pane-2 .book-pill').forEach(p => p.classList.remove('chosen'));
+      pill.classList.add('chosen');
+      bookData.time = pill.dataset.val;
+      document.getElementById('book-next-2').disabled = false;
+    });
+  });
+  document.getElementById('book-back-2').addEventListener('click', () => goStep(1));
+  document.getElementById('book-next-2').addEventListener('click', () => {
+    bookData.date = document.getElementById('book-date').value;
+    document.getElementById('sum-session').textContent = bookData.session;
+    document.getElementById('sum-date').textContent = bookData.date || 'Not selected';
+    document.getElementById('sum-time').textContent = bookData.time;
+    goStep(3);
+  });
+
+  // Pane 3
+  document.getElementById('book-back-3').addEventListener('click', () => goStep(2));
+  document.getElementById('book-submit').addEventListener('click', () => {
+    const name    = document.getElementById('book-name').value.trim();
+    const contact = document.getElementById('book-contact').value.trim();
+    if (!name || !contact) { alert('Please fill in your name and contact details.'); return; }
+    // TODO: replace with real backend — wire up fetch() to your booking API here
+    console.log('Booking request:', { ...bookData, name, contact });
+    document.getElementById('book-pane-3').classList.remove('active');
+    document.querySelector('.book-steps').style.display = 'none';
+    document.getElementById('book-confirm').style.display = 'block';
+  });
+})();
+
+// STEP 10 — Floating Book Now button visibility
+(function() {
+  const btn    = document.getElementById('float-book');
+  const hero   = document.getElementById('hero');
+  const footer = document.getElementById('footer');
+  if (!btn || !hero || !footer) return;
+
+  new IntersectionObserver(([e]) => {
+    btn.classList.toggle('visible', !e.isIntersecting);
+  }, { threshold:0.1 }).observe(hero);
+
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting) btn.classList.remove('visible');
+  }, { threshold:0.1 }).observe(footer);
+})();
+
+// STEP 11 — Ambient audio toggle
+(function() {
+  const audioEl = document.getElementById('cafe-audio');
+  const audioBtn = document.getElementById('audio-btn');
+  const iconOff  = document.getElementById('audio-icon-off');
+  const iconOn   = document.getElementById('audio-icon-on');
+  let playing = false;
+
+  audioBtn.addEventListener('click', () => {
+    if (playing) {
+      audioEl.pause();
+      iconOff.style.display = '';
+      iconOn.style.display  = 'none';
+    } else {
+      audioEl.play().catch(() => {});
+      iconOff.style.display = 'none';
+      iconOn.style.display  = '';
+    }
+    playing = !playing;
+  });
+})();
+
+// STEP 12 — Hamburger menu
+(function() {
+  const burger    = document.getElementById('nav-burger');
+  const mobileNav = document.getElementById('nav-mobile');
+  if (!burger || !mobileNav) return;
+
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('open');
+    mobileNav.classList.toggle('open');
+  });
+
+  mobileNav.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      burger.classList.remove('open');
+      mobileNav.classList.remove('open');
+    });
+  });
+})();
 </script>
 </body>
 </html>
