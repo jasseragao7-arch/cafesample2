@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tiny Canvas Cafe — Meet, Sip, and Create!</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Caveat:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --br:   #6B3A1F;
+      --choc: #3B1A0A;
+      --cr:   #F5ECD7;
+      --lat:  #EDE0CC;
+      --tau:  #C4A882;
+      --tan:  #D6C4A0;
+      --parch:#FDF6EC;
+      --amb:  #C4782A;
+
+      --f-d: 'Fredoka One', cursive;
+      --f-b: 'Courier Prime', monospace;
+      --f-h: 'Caveat', cursive;
+
+      --ease: all .25s ease;
+      --ease-sp: all .45s cubic-bezier(.34,1.56,.64,1);
+      --s1: 0 2px 8px  rgba(59,26,10,.10);
+      --s2: 0 8px 28px rgba(59,26,10,.18);
+      --s3: 0 20px 60px rgba(59,26,10,.28);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--f-b); background: var(--cr); color: var(--choc); overflow-x: hidden; }
+
+    .plaid {
+      background-image:
+        repeating-linear-gradient(0deg,  transparent, transparent 40px, rgba(196,168,130,.2) 40px, rgba(196,168,130,.2) 41.5px),
+        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(196,168,130,.2) 40px, rgba(196,168,130,.2) 41.5px);
+    }
+
+    /* ── SCROLL PROGRESS ── */
+    #prog { position:fixed; top:0; left:0; height:3px; background:var(--br); z-index:500; width:0; transition:width .1s linear; }
+
+    /* ── NAVBAR ── */
+    #nav {
+      position:fixed; top:0; left:0; right:0; z-index:400;
+      height:68px; padding:0 40px;
+      display:flex; align-items:center; justify-content:space-between;
+      transition:background .35s ease, box-shadow .35s ease;
+    }
+    /* Solid dark chocolate after 100px scroll */
+    #nav.solid {
+      background: #3B1A0A;
+      box-shadow: 0 2px 20px rgba(0,0,0,.35);
+    }
+    .nav-logo {
+      font-family:var(--f-d); font-size:1.15rem;
+      color:var(--cr); text-decoration:none;
+      display:flex; align-items:center; gap:8px; letter-spacing:.04em;
+    }
+    .nav-logo-dot { width:8px; height:8px; background:var(--amb); border-radius:50%; }
+    .nav-links { display:none; list-style:none; gap:36px; align-items:center; }
+    .nav-links a {
+      font-family:var(--f-b); font-size:.72rem; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase;
+      color:var(--cr); text-decoration:none; opacity:.7; transition:var(--ease);
+    }
+    .nav-links a:hover { opacity:1; }
+    .nav-cta {
+      font-family:var(--f-d); font-size:.85rem;
+      background:var(--tau); color:var(--choc);
+      padding:8px 20px; border-radius:99px;
+      text-decoration:none; transition:var(--ease); letter-spacing:.04em;
+      opacity:1 !important;
+    }
+    .nav-cta:hover { background:var(--cr); transform:translateY(-1px); }
+    @media (min-width:700px) { .nav-links { display:flex; } }
+
+    /* ── HERO ── */
+    #hero {
+      position:relative; min-height:100vh;
+      display:flex; align-items:center; justify-content:center;
+      overflow:hidden;
+      background:
+        radial-gradient(ellipse at 15% 80%, rgba(196,120,42,.32) 0%, transparent 52%),
+        radial-gradient(ellipse at 85% 15%, rgba(180,120,60,.26) 0%, transparent 48%),
+        radial-gradient(ellipse at 50% 50%, rgba(245,230,200,.6) 0%, transparent 72%),
+        #E8D8B8;
+    }
+    /* plaid depth layer — opacity bumped to .18 */
+    #hero::before {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background-image:
+        repeating-linear-gradient(0deg,  transparent, transparent 40px, rgba(196,168,130,.18) 40px, rgba(196,168,130,.18) 41.5px),
+        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(196,168,130,.18) 40px, rgba(196,168,130,.18) 41.5px);
+    }
+    /* dot grid — opacity .15 as requested */
+    #hero::after {
+      content:''; position:absolute; inset:0; pointer-events:none;
+      background-image: radial-gradient(circle, rgba(107,58,31,.15) 1.5px, transparent 1.5px);
+      background-size:28px 28px;
+    }
+    .hero-grain {
+      position:absolute; inset:0; z-index:2; pointer-events:none; opacity:.06;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size:180px 180px;
+    }
+    .hero-vig {
+      position:absolute; inset:0; z-index:3; pointer-events:none;
+      background:radial-gradient(ellipse at 50% 50%, transparent 36%, rgba(59,26,10,.42) 100%);
+    }
+    /* Large warm radial glow behind hero text */
+    .hero-glow {
+      position:absolute; z-index:8; pointer-events:none;
+      width:min(860px,90vw); height:min(700px,80vh);
+      top:50%; left:50%; transform:translate(-50%,-50%);
+      background:radial-gradient(ellipse at center,
+        rgba(250,238,208,.92) 0%,
+        rgba(237,224,204,.65) 30%,
+        rgba(232,216,184,.3) 55%,
+        transparent 72%);
+    }
+
+    /* Floating icons — 2.5× larger */
+    .floats { position:absolute; inset:0; z-index:5; pointer-events:none; }
+    .fl { position:absolute; will-change:transform; }
+    .fl-cup   { top:14%; right:3%;  width:clamp(200px,22vw,280px); animation:bob 7s ease-in-out infinite; }
+    .fl-brush { bottom:18%; left:2%; width:clamp(160px,16vw,220px); animation:bob 9s ease-in-out infinite reverse; }
+    .fl-pal   { top:58%; right:2%;  width:clamp(150px,15vw,200px); animation:bob 8s ease-in-out infinite 1.5s; }
+    .fl-bean  { top:24%; left:5%;   width:clamp(100px,11vw,140px); animation:bob 10s ease-in-out infinite 3s; }
+    .fl-star1 { top:8%; left:24%;  font-size:clamp(1.4rem,3vw,2.4rem); animation:spin-slow 18s linear infinite; opacity:.3; color:var(--br); }
+    .fl-star2 { bottom:14%; right:20%; font-size:clamp(1.1rem,2.5vw,2rem); animation:spin-slow 22s linear infinite reverse; opacity:.25; color:var(--tau); }
+    @keyframes bob { 0%,100%{transform:translateY(0) rotate(0deg);} 33%{transform:translateY(-18px) rotate(3deg);} 66%{transform:translateY(-9px) rotate(-2deg);} }
+    @keyframes spin-slow { to{ transform:rotate(360deg); } }
+
+    .hero-c {
+      position:relative; z-index:10;
+      text-align:center; padding:0 24px;
+      max-width:900px; margin:0 auto;
+    }
+    .hero-eyebrow {
+      display:inline-flex; align-items:center; gap:10px;
+      font-family:var(--f-h); font-size:clamp(1rem,2.5vw,1.3rem);
+      color:var(--br); opacity:.9; margin-bottom:16px;
+      background:rgba(245,236,215,.55); backdrop-filter:blur(4px);
+      padding:6px 20px; border-radius:99px;
+      border:1px solid rgba(196,168,130,.45);
+    }
+    .rw { height:2.6rem; overflow:hidden; margin-bottom:14px; }
+    .ri { display:flex; flex-direction:column; transition:transform .55s cubic-bezier(.25,.46,.45,.94); }
+    .rword {
+      height:2.6rem; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--f-h); font-size:clamp(1.1rem,2.5vw,1.5rem);
+      color:var(--br); font-style:italic; opacity:.85;
+    }
+
+    /* SVG arch — viewBox raised so text doesn't clip at top */
+    .hero-arch svg { width:min(740px,95vw); height:auto; overflow:visible; filter:drop-shadow(0 3px 8px rgba(59,26,10,.2)); }
+
+    .hero-tagline {
+      font-family:var(--f-d); font-size:clamp(1rem,3vw,1.7rem);
+      color:var(--choc); letter-spacing:.15em; text-transform:uppercase; margin-bottom:40px;
+    }
+    .hero-cta { display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+    .btn {
+      display:inline-block; font-family:var(--f-d); font-size:.95rem;
+      padding:14px 34px; border-radius:99px; text-decoration:none;
+      cursor:pointer; border:none; transition:var(--ease); letter-spacing:.04em;
+      position:relative; overflow:hidden;
+    }
+    .btn-p { background:var(--br); color:var(--cr); box-shadow:0 4px 16px rgba(107,58,31,.35); }
+    .btn-p:hover { transform:translateY(-3px); box-shadow:0 8px 28px rgba(107,58,31,.45); }
+    .btn-p:active { transform:translateY(0); }
+    .btn-o { background:rgba(245,236,215,.25); color:var(--choc); border:2px solid var(--br); backdrop-filter:blur(4px); }
+    .btn-o:hover { background:var(--br); color:var(--cr); transform:translateY(-3px); box-shadow:var(--s2); }
+
+    .scroll-hint {
+      position:absolute; bottom:32px; left:50%; transform:translateX(-50%);
+      z-index:10; display:flex; flex-direction:column; align-items:center; gap:6px;
+      font-family:var(--f-b); font-size:.65rem; letter-spacing:.15em;
+      text-transform:uppercase; color:var(--br); opacity:.55;
+    }
+    .scroll-mouse { width:22px; height:34px; border:2px solid var(--br); border-radius:11px; display:flex; align-items:flex-start; justify-content:center; padding-top:5px; }
+    .scroll-dot { width:3px; height:6px; background:var(--br); border-radius:2px; animation:scroll-d 1.6s ease-in-out infinite; }
+    @keyframes scroll-d { 0%{opacity:1;transform:translateY(0);} 100%{opacity:0;transform:translateY(10px);} }
+
+    /* ── MARQUEE ── */
+    .marquee-strip { background:var(--choc); padding:14px 0; overflow:hidden; border-top:3px solid var(--br); border-bottom:3px solid var(--br); }
+    .marquee-inner { display:flex; gap:0; white-space:nowrap; animation:marquee 28s linear infinite; }
+    .marquee-inner:hover { animation-play-state:paused; }
+    .marquee-item { display:inline-flex; align-items:center; gap:12px; font-family:var(--f-d); font-size:.95rem; letter-spacing:.06em; padding:0 40px; color:var(--lat); }
+    .marquee-dot { color:var(--tau); font-size:1.2rem; }
+    @keyframes marquee { 0%{transform:translateX(0);} 100%{transform:translateX(-50%);} }
+
+    /* ── WAVES — all cream #F5ECD7 ── */
+    .wave { display:block; width:100%; line-height:0; }
+
+    /* ── SECTION SHARED — 120px padding ── */
+    .sec { padding:120px 24px; }
+    .ctr { max-width:1100px; margin:0 auto; }
+    .sec-head { text-align:center; margin-bottom:72px; }
+    .overline { display:block; font-family:var(--f-b); font-size:.68rem; font-weight:700; letter-spacing:.22em; text-transform:uppercase; color:var(--tau); margin-bottom:8px; }
+    .accent-bar { display:block; width:48px; height:3px; background:linear-gradient(90deg,var(--br),var(--tau)); border-radius:2px; margin:10px auto 20px; }
+    .sec-head h2 { font-family:var(--f-d); font-size:clamp(2rem,5vw,3rem); color:var(--br); }
+
+    .fi { opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s ease; }
+    .fi.vis { opacity:1; transform:translateY(0); }
+
+    /* ── ABOUT ── */
+    #about { background:var(--cr); }
+    .about-intro {
+      max-width:640px; margin:0 auto 72px; text-align:center;
+      font-family:var(--f-h); font-size:clamp(1.15rem,2.5vw,1.45rem);
+      color:var(--choc); line-height:1.65;
+    }
+    .about-intro em { color:var(--br); font-style:normal; }
+    .about-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:24px; }
+
+    /* Distinct warm bg per card, thick dashed border, no white */
+    .about-card {
+      border-radius:12px; padding:40px 28px; text-align:center;
+      border:3px dashed #C4A882;
+      transition:var(--ease); position:relative;
+    }
+    .about-card:nth-child(1) { background:#F5E6D0; }
+    .about-card:nth-child(2) { background:#EDD9C0; }
+    .about-card:nth-child(3) { background:#E8D5B0; }
+    .about-card:hover { transform:translateY(-6px); box-shadow:var(--s2); border-color:var(--br); }
+    .about-ico-wrap {
+      font-size:3rem; display:block; margin-bottom:20px;
+      line-height:1;
+    }
+    .about-card h3 { font-family:var(--f-d); font-size:1.25rem; color:var(--br); margin-bottom:10px; }
+    .about-card p  { font-size:.9rem; color:var(--choc); line-height:1.65; opacity:.85; }
+
+    /* ── ACTIVITIES ── */
+    #activities { position:relative; overflow:hidden; }
+    .act-bg-dot { position:absolute; inset:0; pointer-events:none; background-image:radial-gradient(circle, rgba(107,58,31,.05) 1px, transparent 1px); background-size:32px 32px; }
+    .act-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:28px; position:relative; z-index:1; }
+
+    .act-card {
+      background:#FDF6EC;
+      border-radius:16px; overflow:hidden; position:relative;
+      border-top:4px solid #6B3A1F;  /* bold top stripe */
+      box-shadow:var(--s1);
+      transition:transform .3s ease, box-shadow .3s ease;
+    }
+    .act-card:hover {
+      transform:translateY(-8px);
+      box-shadow:0 16px 40px rgba(107,58,31,.2);
+    }
+    .act-card-head {
+      height:110px; position:relative;
+      display:flex; align-items:center; justify-content:center;
+    }
+    .act-card:nth-child(1) .act-card-head { background:linear-gradient(135deg,#A05030 0%,#C4784A 55%,#D4A070 100%); }
+    .act-card:nth-child(2) .act-card-head { background:linear-gradient(135deg,#6B3A1F 0%,#8B5230 55%,#B47840 100%); }
+    .act-card:nth-child(3) .act-card-head { background:linear-gradient(135deg,#4A2010 0%,#6B3A1F 55%,#9B6040 100%); }
+    .act-card-head::before {
+      content:''; position:absolute; inset:0;
+      background-image:repeating-linear-gradient(0deg,transparent,transparent 18px,rgba(255,255,255,.06) 18px,rgba(255,255,255,.06) 19px),
+        repeating-linear-gradient(90deg,transparent,transparent 18px,rgba(255,255,255,.06) 18px,rgba(255,255,255,.06) 19px);
+    }
+    .act-icon-circle {
+      width:68px; height:68px; border-radius:50%;
+      background:rgba(245,236,215,.22); backdrop-filter:blur(4px);
+      border:2px solid rgba(245,236,215,.4);
+      display:flex; align-items:center; justify-content:center;
+      font-size:2.2rem; position:relative; z-index:1;
+    }
+    .act-card-body { padding:32px; } /* 2rem = 32px */
+    .act-card h3 { font-family:var(--f-d); font-size:1.4rem; color:var(--br); margin-bottom:12px; }
+    .act-card p  { font-size:.9rem; color:var(--choc); opacity:.82; line-height:1.65; margin-bottom:20px; }
+
+    /* "from X AED" price label */
+    .act-price {
+      display:inline-block;
+      font-family:var(--f-d); font-size:1.1rem; color:var(--br);
+      background:var(--cr); border:2px solid var(--tan);
+      padding:6px 18px; border-radius:99px; margin-bottom:14px;
+      letter-spacing:.03em;
+    }
+    .act-tag {
+      display:inline-flex; align-items:center; gap:6px;
+      font-family:var(--f-b); font-size:.68rem; font-weight:700;
+      letter-spacing:.14em; text-transform:uppercase;
+      color:var(--tau); background:var(--lat);
+      padding:5px 12px; border-radius:99px;
+    }
+
+    /* ── MENU ── */
+    #menu { position:relative; }
+    .menu-tabs {
+      display:flex; justify-content:center; gap:4px; margin-bottom:48px;
+      background:var(--lat); border-radius:99px; padding:6px;
+      width:fit-content; margin-left:auto; margin-right:auto;
+      box-shadow:inset 0 2px 8px rgba(59,26,10,.1);
+    }
+    .menu-tab {
+      padding:10px 28px; font-family:var(--f-d); font-size:1rem;
+      color:var(--tau); background:none; border:none;
+      cursor:pointer; border-radius:99px; transition:var(--ease);
+      letter-spacing:.04em; white-space:nowrap;
+    }
+    .menu-tab.active { background:var(--br); color:var(--cr); box-shadow:0 2px 12px rgba(107,58,31,.35); }
+    .menu-panel { display:none; }
+    .menu-panel.active { display:block; animation:fadeup .35s ease; }
+    @keyframes fadeup { from{opacity:0;transform:translateY(12px);} to{opacity:1;transform:translateY(0);} }
+
+    .menu-board {
+      /* max-width 700px, parchment bg */
+      background:#FDF6EC; max-width:700px; margin:0 auto;
+      border-radius:20px; overflow:hidden;
+      box-shadow:var(--s2), inset 0 0 0 1.5px var(--tan);
+      position:relative;
+    }
+    /* Coffee bean watermark at bottom-right */
+    .menu-board::after {
+      content:''; position:absolute; bottom:20px; right:20px;
+      width:80px; height:110px; opacity:.08; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 56 78' fill='%233B1A0A' xmlns='http://www.w3.org/2000/svg'%3E%3Cellipse cx='28' cy='39' rx='21' ry='31'/%3E%3Cpath d='M28 11 Q28 39 28 67' stroke='%23F5ECD7' stroke-width='4' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-size:contain; background-repeat:no-repeat;
+    }
+    .menu-board-top {
+      padding:32px; text-align:center; border-bottom:1.5px solid var(--tan);
+      position:relative; overflow:hidden;
+    }
+    .menu-board-top::before {
+      content:''; position:absolute; inset:0;
+      background:linear-gradient(180deg,var(--lat) 0%,transparent 100%); opacity:.5;
+    }
+    .board-emoji { font-size:2.5rem; display:block; position:relative; z-index:1; margin-bottom:6px; }
+    .board-title { position:relative; z-index:1; font-family:var(--f-d); font-size:1.8rem; color:var(--br); letter-spacing:.04em; }
+    .menu-board-items { padding:8px 40px 40px; }
+    .menu-row {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:18px 0; border-bottom:1px dashed var(--tan);
+      transition:var(--ease);
+    }
+    .menu-row:last-child { border-bottom:none; }
+    .menu-row:hover { padding-left:10px; }
+    .menu-name  { font-family:var(--f-b); font-size:1.05rem; color:var(--choc); } /* bumped to 1.05rem */
+    .menu-price { font-family:var(--f-d); font-size:1rem; font-weight:700; color:var(--br); background:var(--cr); border:1.5px solid var(--tan); padding:4px 14px; border-radius:99px; white-space:nowrap; } /* 1rem bold */
+    .menu-splash { text-align:center; font-size:1.2rem; color:var(--tau); margin:16px 0 8px; opacity:.6; }
+
+    /* ── GALLERY — proper polaroids with SVG illustrations ── */
+    #gallery { position:relative; overflow:hidden; }
+    .gallery-surface {
+      background:linear-gradient(135deg,#B08850 0%,#906830 40%,#B08850 70%,#A07840 100%);
+      border-radius:20px; padding:48px 32px 40px;
+      box-shadow:inset 0 0 80px rgba(59,26,10,.3), var(--s2);
+      position:relative; overflow:hidden;
+    }
+    .gallery-surface::before {
+      content:''; position:absolute; inset:0;
+      background-image:repeating-linear-gradient(88deg,transparent,transparent 10px,rgba(255,255,255,.025) 10px,rgba(255,255,255,.025) 11px);
+    }
+    .polaroid-wrap {
+      display:flex; flex-wrap:wrap; justify-content:center;
+      align-items:flex-start; gap:28px; position:relative; z-index:1;
+    }
+    .pol {
+      background:white; padding:12px 12px 40px;
+      box-shadow:0 4px 16px rgba(0,0,0,.28), 0 14px 44px rgba(0,0,0,.16);
+      cursor:pointer; position:relative; flex-shrink:0;
+      transition:transform .38s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
+      width:clamp(150px,20vw,190px);
+    }
+    .pol:nth-child(1) { transform:rotate(-4deg); }
+    .pol:nth-child(2) { transform:rotate(2.5deg) translateY(-12px); }
+    .pol:nth-child(3) { transform:rotate(-1.5deg); }
+    .pol:nth-child(4) { transform:rotate(3.5deg) translateY(10px); }
+    .pol:nth-child(5) { transform:rotate(-2deg) translateY(-16px); }
+    .pol:hover { transform:rotate(0deg) scale(1.1) translateY(-14px) !important; box-shadow:0 20px 56px rgba(0,0,0,.42), 0 4px 14px rgba(0,0,0,.18); z-index:20; }
+    .pol-art { width:100%; aspect-ratio:1; display:block; }
+    .pol-label { position:absolute; bottom:0; left:0; right:0; height:40px; display:flex; align-items:center; justify-content:center; font-family:var(--f-h); font-size:.82rem; color:#555; text-align:center; padding:0 8px; }
+
+    @media (max-width:600px) { .polaroid-wrap{gap:16px;} .pol{width:130px;padding:10px 10px 36px;} .pol:nth-child(n){transform:none;} }
+
+    /* ── CTA ── */
+    #cta { background:var(--br); padding:120px 24px; text-align:center; position:relative; overflow:hidden; }
+    #cta::before { content:''; position:absolute; inset:0; background-image:repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(255,255,255,.04) 40px,rgba(255,255,255,.04) 41px),repeating-linear-gradient(90deg,transparent,transparent 40px,rgba(255,255,255,.04) 40px,rgba(255,255,255,.04) 41px); }
+    #cta::after { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 50%,rgba(196,120,42,.32) 0%,transparent 65%); }
+    .cta-inner { position:relative; z-index:1; }
+    .cta-eyebrow { font-family:var(--f-b); font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--tau); margin-bottom:16px; }
+    .cta-head { font-family:var(--f-d); font-size:clamp(2rem,5vw,3.2rem); color:var(--cr); margin-bottom:16px; }
+    .cta-sub { font-family:var(--f-h); font-size:clamp(1.1rem,2.5vw,1.4rem); color:var(--tau); margin-bottom:40px; }
+    .btn-cta { background:var(--cr); color:var(--br); font-family:var(--f-d); font-size:1rem; padding:16px 40px; border-radius:99px; text-decoration:none; display:inline-block; transition:var(--ease); letter-spacing:.04em; box-shadow:0 4px 20px rgba(0,0,0,.2); }
+    .btn-cta:hover { background:var(--lat); transform:translateY(-3px); box-shadow:0 10px 36px rgba(0,0,0,.3); }
+
+    /* ── FOOTER ── */
+    #footer { background:var(--choc); color:var(--cr); padding:80px 24px 40px; text-align:center; position:relative; overflow:hidden; }
+    #footer::before { content:''; position:absolute; inset:0; background-image:radial-gradient(circle,rgba(196,168,130,.04) 1px,transparent 1px); background-size:28px 28px; }
+    .foot-inner { position:relative; z-index:1; }
+    .foot-logo { font-family:var(--f-d); font-size:2.2rem; color:var(--lat); letter-spacing:.05em; margin-bottom:6px; }
+    .foot-tag  { font-family:var(--f-h); font-size:1.2rem; color:var(--tau); margin-bottom:40px; }
+    .foot-divider-wave { margin:0 auto 36px; opacity:.15; display:block; max-width:380px; }
+    .foot-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:32px; max-width:600px; margin:0 auto 48px; text-align:left; }
+    .foot-col-label { font-family:var(--f-b); font-size:.65rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--tau); margin-bottom:12px; }
+    .foot-col p, .foot-col a { font-family:var(--f-b); font-size:.85rem; line-height:1.8; color:rgba(245,236,215,.65); text-decoration:none; display:block; transition:var(--ease); }
+    .foot-col a:hover { color:var(--cr); }
+    .foot-soc { display:flex; gap:12px; margin-top:8px; }
+    .soc-btn { width:36px; height:36px; border-radius:50%; border:1.5px solid rgba(196,168,130,.3); display:flex; align-items:center; justify-content:center; color:var(--tau); transition:var(--ease); text-decoration:none; }
+    .soc-btn:hover { border-color:var(--tau); color:var(--cr); transform:translateY(-2px); }
+    .foot-bottom { border-top:1px solid rgba(196,168,130,.15); padding-top:28px; margin-top:8px; }
+    .foot-copy { font-family:var(--f-b); font-size:.72rem; color:rgba(196,168,130,.5); letter-spacing:.07em; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width:640px) {
+      .sec { padding:80px 20px; }
+      .hero-cta { flex-direction:column; align-items:center; }
+      .act-grid { grid-template-columns:1fr; }
+      .about-grid { grid-template-columns:1fr; }
+      .menu-tab { padding:9px 16px; font-size:.85rem; }
+      #cta { padding:80px 20px; }
+    }
+  </style>
+</head>
+<body>
+<div id="prog"></div>
+
+<!-- NAVBAR -->
+<nav id="nav">
+  <a href="#hero" class="nav-logo"><span class="nav-logo-dot"></span>Tiny Canvas Cafe</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#activities">Activities</a></li>
+    <li><a href="#menu">Menu</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#cta" class="nav-cta">Visit Us</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grain"></div>
+  <div class="hero-vig"></div>
+  <div class="hero-glow"></div>
+
+  <!-- Floating icons — 2.5× larger with bob animation -->
+  <div class="floats" id="floats">
+    <div class="fl fl-cup" data-depth="0.4">
+      <svg viewBox="0 0 120 102" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 33 L98 33 L87 85 H33 Z" fill="#6B3A1F" opacity=".92"/>
+        <path d="M87 43 Q115 43 115 57 Q115 71 87 71" stroke="#6B3A1F" stroke-width="6.5" fill="none" stroke-linecap="round" opacity=".92"/>
+        <ellipse cx="60" cy="87" rx="37" ry="6.5" fill="#3B1A0A" opacity=".35"/>
+        <path d="M47 55 Q47 46 54 46 Q60 46 60 55 Q60 46 66 46 Q73 46 73 55 Q73 63 60 73 Q47 63 47 55Z" fill="#F0E0C8" opacity=".82"/>
+        <path d="M37 26 Q40 18 37 10" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+        <path d="M60 23 Q63 14 60 5"  stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+        <path d="M83 26 Q86 18 83 10" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+      </svg>
+    </div>
+    <div class="fl fl-brush" data-depth="0.6">
+      <svg viewBox="0 0 66 175" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="26" y="16" width="14" height="116" rx="7" fill="#7A4E2A" opacity=".92"/>
+        <rect x="23" y="124" width="20" height="12" rx="3" fill="#C4A882" opacity=".95"/>
+        <path d="M23 136 Q18 151 24 167 Q33 177 42 167 Q48 151 43 136 Z" fill="#5A2A10" opacity=".92"/>
+        <ellipse cx="33" cy="165" rx="8" ry="5" fill="#C4683A" opacity=".8"/>
+        <path d="M33 169 Q32 175 34 180" stroke="#C4683A" stroke-width="3" fill="none" stroke-linecap="round" opacity=".6"/>
+      </svg>
+    </div>
+    <div class="fl fl-pal" data-depth="0.3">
+      <svg viewBox="0 0 88 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M5 40 Q5 5 44 5 Q79 5 83 34 Q88 54 68 64 Q53 71 44 59 Q39 54 29 59 Q9 69 5 40Z" fill="#EDE0CC" stroke="#C4A882" stroke-width="2.5" opacity=".95"/>
+        <circle cx="24" cy="20" r="7.5" fill="#C4783A" opacity=".9"/>
+        <circle cx="46" cy="14" r="7.5" fill="#5A8840" opacity=".9"/>
+        <circle cx="66" cy="22" r="7.5" fill="#8B6030" opacity=".9"/>
+        <circle cx="70" cy="43" r="7.5" fill="#B46830" opacity=".9"/>
+        <circle cx="19" cy="42" r="6.5" fill="#A05030" opacity=".9"/>
+        <circle cx="37" cy="51" r="9" fill="#F5ECD7" opacity=".95"/>
+      </svg>
+    </div>
+    <div class="fl fl-bean" data-depth="0.7">
+      <svg viewBox="0 0 56 78" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="28" cy="39" rx="21" ry="31" fill="#3B1A0A" opacity=".88"/>
+        <path d="M28 11 Q28 39 28 67" stroke="#6B3A1F" stroke-width="4" fill="none" stroke-linecap="round" opacity=".5"/>
+      </svg>
+    </div>
+    <div class="fl fl-star1">✦</div>
+    <div class="fl fl-star2">✦</div>
+  </div>
+
+  <div class="hero-c">
+    <div class="hero-eyebrow">✨ Abu Dhabi's cosiest sip &amp; paint café ✨</div>
+    <div class="rw">
+      <div class="ri" id="rotator">
+        <span class="rword">sip and paint!</span>
+        <span class="rword">create and connect!</span>
+        <span class="rword">brew and sculpt!</span>
+        <span class="rword">sip and paint!</span>
+      </div>
+    </div>
+
+    <!-- Fixed arch: viewBox tall enough so peak text doesn't clip -->
+    <div class="hero-arch">
+      <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" aria-label="Tiny Canvas Cafe">
+        <defs>
+          <path id="a" d="M 38,248 Q 380,72 722,248"/>
+          <filter id="sh" x="-5%" y="-30%" width="110%" height="160%">
+            <feDropShadow dx="0" dy="3" stdDeviation="5" flood-color="#3B1A0A" flood-opacity=".2"/>
+          </filter>
+        </defs>
+        <circle cx="38"  cy="248" r="7" fill="#C4A882" opacity=".5"/>
+        <circle cx="722" cy="248" r="7" fill="#C4A882" opacity=".5"/>
+        <text font-family="'Fredoka One',cursive" font-size="68" fill="#6B3A1F" filter="url(#sh)">
+          <textPath href="#a" startOffset="50%" text-anchor="middle" letter-spacing="5">TINY CANVAS CAFE</textPath>
+        </text>
+      </svg>
+    </div>
+
+    <p class="hero-tagline">Meet, Sip, and Create!</p>
+    <div class="hero-cta">
+      <a href="#activities" class="btn btn-p">Explore Activities</a>
+      <a href="#menu"       class="btn btn-o">See the Menu</a>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-mouse"><div class="scroll-dot"></div></div>
+    <span>Scroll</span>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span class="marquee-item">☕ Specialty Coffee <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">🎨 Sip &amp; Paint Sessions <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">🏺 Ceramic Sculpting <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">📍 Abu Dhabi, UAE <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">🥐 Fresh Pastries <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">✨ No Experience Needed <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">☕ Specialty Coffee <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">🎨 Sip &amp; Paint Sessions <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">🏺 Ceramic Sculpting <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">📍 Abu Dhabi, UAE <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">🥐 Fresh Pastries <span class="marquee-dot">·</span></span>
+    <span class="marquee-item">✨ No Experience Needed <span class="marquee-dot">·</span></span>
+  </div>
+</div>
+
+<!-- wave — cream #F5ECD7 -->
+<svg class="wave" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:#E8D8B8;">
+  <path d="M0,36 C320,72 720,0 1080,46 C1260,66 1360,28 1440,36 L1440,72 L0,72 Z" fill="#F5ECD7"/>
+</svg>
+
+<!-- ABOUT -->
+<section id="about" class="sec plaid" style="background-color:#F5ECD7;">
+  <div class="ctr">
+    <div class="sec-head fi">
+      <span class="overline">Welcome to our cosy corner</span>
+      <span class="accent-bar"></span>
+      <h2>More than a café.</h2>
+    </div>
+    <p class="about-intro fi" style="transition-delay:.08s">
+      Step into <em>Tiny Canvas Cafe</em> — Abu Dhabi's warmest sip &amp; paint experience.
+      Whether you're a first-time painter or a seasoned artist, grab a drink,
+      pick up a brush, and let your creativity flow.
+    </p>
+    <div class="about-grid">
+      <!-- card 1: #F5E6D0 -->
+      <div class="about-card fi" style="transition-delay:.06s">
+        <span class="about-ico-wrap">☕</span>
+        <h3>Coffee &amp; Drinks</h3>
+        <p>Signature lattes, fresh juices, and warming karak — every sip made with love for the artist in you.</p>
+      </div>
+      <!-- card 2: #EDD9C0 -->
+      <div class="about-card fi" style="transition-delay:.16s">
+        <span class="about-ico-wrap">🎨</span>
+        <h3>Art Activities</h3>
+        <p>From mini canvas starters to full masterpiece bundles — paint at your own pace, your own way.</p>
+      </div>
+      <!-- card 3: #E8D5B0 -->
+      <div class="about-card fi" style="transition-delay:.26s">
+        <span class="about-ico-wrap">🏺</span>
+        <h3>Ceramics</h3>
+        <p>Shape, paint, and glaze your own ceramic piece from scratch. A truly hands-on masterpiece.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- wave cream -->
+<svg class="wave" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:#F5ECD7;">
+  <path d="M0,28 C480,72 960,0 1440,42 L1440,72 L0,72 Z" fill="#F5ECD7"/>
+</svg>
+
+<!-- ACTIVITIES -->
+<section id="activities" class="sec plaid" style="background-color:#EDE0CC;">
+  <div class="act-bg-dot"></div>
+  <div class="ctr">
+    <div class="sec-head fi">
+      <span class="overline">Pick your creative adventure</span>
+      <span class="accent-bar"></span>
+      <h2>Activity Guide</h2>
+    </div>
+    <div class="act-grid">
+      <div class="act-card fi" style="transition-delay:.05s">
+        <div class="act-card-head"><div class="act-icon-circle">🖼️</div></div>
+        <div class="act-card-body">
+          <h3>The Tiny Starter</h3>
+          <p>Mini canvas (20×20 cm) + painting palette. Perfect for beginners wanting a taste of creativity without the overwhelm.</p>
+          <div class="act-price">From 45 AED</div><br>
+          <span class="act-tag">✦ Beginner Friendly</span>
+        </div>
+      </div>
+      <div class="act-card fi" style="transition-delay:.15s">
+        <div class="act-card-head"><div class="act-icon-circle">🎨</div></div>
+        <div class="act-card-body">
+          <h3>The Masterpiece Bundle</h3>
+          <p>Medium canvas (50×50 cm) + painting palette + any drink of your choice. The full creative experience, start to finish.</p>
+          <div class="act-price">From 85 AED</div><br>
+          <span class="act-tag">✦ Most Popular</span>
+        </div>
+      </div>
+      <div class="act-card fi" style="transition-delay:.25s">
+        <div class="act-card-head"><div class="act-icon-circle">🏺</div></div>
+        <div class="act-card-body">
+          <h3>Sculpt'nPaint</h3>
+          <p>Create your own ceramics from scratch, then paint and glaze them. A truly hands-on experience unlike anything else.</p>
+          <div class="act-price">From 120 AED</div><br>
+          <span class="act-tag">✦ Hands-On</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- wave cream -->
+<svg class="wave" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:#EDE0CC;">
+  <path d="M0,48 C360,0 720,72 1080,32 C1260,12 1380,56 1440,42 L1440,72 L0,72 Z" fill="#F5ECD7"/>
+</svg>
+
+<!-- MENU -->
+<section id="menu" class="sec plaid" style="background-color:#F5ECD7;">
+  <div class="ctr">
+    <div class="sec-head fi">
+      <span class="overline">Fuel your creativity</span>
+      <span class="accent-bar"></span>
+      <h2>Our Menu</h2>
+    </div>
+    <div class="menu-tabs fi" style="transition-delay:.1s">
+      <button class="menu-tab active" data-tab="coffee">☕ Coffee</button>
+      <button class="menu-tab"        data-tab="juices">🧃 Juices</button>
+      <button class="menu-tab"        data-tab="pastries">🥐 Pastries</button>
+    </div>
+
+    <div class="menu-panel active fi" id="panel-coffee" style="transition-delay:.15s">
+      <div class="menu-board">
+        <div class="menu-board-top"><span class="board-emoji">☕</span><p class="board-title">Coffee</p></div>
+        <div class="menu-board-items">
+          <div class="menu-row"><span class="menu-name">Signature Latte</span><span class="menu-price">25 AED</span></div>
+          <div class="menu-row"><span class="menu-name">Spanish Latte</span><span class="menu-price">22 AED</span></div>
+          <div class="menu-row"><span class="menu-name">Iced Latte</span><span class="menu-price">20 AED</span></div>
+          <div class="menu-row"><span class="menu-name">Karak Chai</span><span class="menu-price">8 AED</span></div>
+          <p class="menu-splash">☕ · ☕ · ☕</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="panel-juices">
+      <div class="menu-board">
+        <div class="menu-board-top"><span class="board-emoji">🧃</span><p class="board-title">Juices &amp; Smoothies</p></div>
+        <div class="menu-board-items">
+          <div class="menu-row"><span class="menu-name">Fresh Strawberry Juice</span><span class="menu-price">10 AED</span></div>
+          <div class="menu-row"><span class="menu-name">Fresh Mango Juice</span><span class="menu-price">10 AED</span></div>
+          <div class="menu-row"><span class="menu-name">Strawberry &amp; Banana Smoothie</span><span class="menu-price">15 AED</span></div>
+          <div class="menu-row"><span class="menu-name">Mixed Berry Smoothie</span><span class="menu-price">15 AED</span></div>
+          <p class="menu-splash">🍓 · 🥭 · 🫐</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="menu-panel" id="panel-pastries">
+      <div class="menu-board">
+        <div class="menu-board-top"><span class="board-emoji">🥐</span><p class="board-title">Pastries</p></div>
+        <div class="menu-board-items">
+          <div class="menu-row"><span class="menu-name">Butter Croissant</span><span class="menu-price">12 AED</span></div>
+          <div class="menu-row"><span class="menu-name">Pain au Chocolat</span><span class="menu-price">15 AED</span></div>
+          <p class="menu-splash">🥐 · 🍫 · 🥐</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- wave cream -->
+<svg class="wave" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:#F5ECD7;">
+  <path d="M0,22 C360,72 720,8 1080,56 C1260,76 1380,36 1440,32 L1440,72 L0,72 Z" fill="#F5ECD7"/>
+</svg>
+
+<!-- GALLERY -->
+<section id="gallery" class="sec plaid" style="background-color:#EDE0CC;">
+  <div class="ctr">
+    <div class="sec-head fi">
+      <span class="overline">From our canvas to yours</span>
+      <span class="accent-bar"></span>
+      <h2>What You'll Create</h2>
+    </div>
+
+    <div class="gallery-surface fi" style="transition-delay:.1s">
+      <div class="polaroid-wrap">
+
+        <!-- Polaroid 1: Canvas painting (warm landscape) -->
+        <div class="pol">
+          <svg class="pol-art" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="#F5ECD7"/>
+            <rect x="20" y="16" width="120" height="96" rx="2" fill="white" stroke="#C4A882" stroke-width="2.5"/>
+            <rect x="23" y="19" width="114" height="58" fill="#E8901A" opacity=".75"/>
+            <circle cx="108" cy="44" r="18" fill="#F5C040"/>
+            <rect x="23" y="58" width="114" height="18" fill="#C46820" opacity=".55"/>
+            <rect x="23" y="71" width="114" height="44" fill="#7B4E28"/>
+            <path d="M23,76 Q68,50 114,74 L114,115 L23,115 Z" fill="#5A7830"/>
+            <line x1="20" y1="112" x2="7" y2="148" stroke="#8B5E3C" stroke-width="4" stroke-linecap="round"/>
+            <line x1="140" y1="112" x2="153" y2="148" stroke="#8B5E3C" stroke-width="4" stroke-linecap="round"/>
+            <line x1="80" y1="112" x2="80" y2="154" stroke="#8B5E3C" stroke-width="4" stroke-linecap="round"/>
+          </svg>
+          <span class="pol-label">Sunset on canvas 🌅</span>
+        </div>
+
+        <!-- Polaroid 2: Latte art coffee cup -->
+        <div class="pol">
+          <svg class="pol-art" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="#F0E4CC"/>
+            <ellipse cx="80" cy="140" rx="52" ry="9" fill="#C4A882" opacity=".35"/>
+            <path d="M30,62 L130,62 L115,132 H45 Z" fill="#6B3A1F"/>
+            <ellipse cx="80" cy="62" rx="50" ry="10" fill="#8B5030"/>
+            <ellipse cx="80" cy="62" rx="44" ry="9" fill="#C4904A"/>
+            <path d="M60,60 Q60,51 68,51 Q80,51 80,60 Q80,51 92,51 Q100,51 100,60 Q100,70 80,80 Q60,70 60,60Z" fill="#F5ECD7" opacity=".88"/>
+            <path d="M115,78 Q148,78 148,98 Q148,118 115,118" stroke="#6B3A1F" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <path d="M55,54 Q59,44 55,30" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+            <path d="M80,50 Q84,38 80,22" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+            <path d="M105,54 Q109,44 105,30" stroke="#C4A882" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/>
+          </svg>
+          <span class="pol-label">Latte art session ☕</span>
+        </div>
+
+        <!-- Polaroid 3: Ceramic pot -->
+        <div class="pol">
+          <svg class="pol-art" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="#EDE0CC"/>
+            <ellipse cx="80" cy="150" rx="46" ry="8" fill="#3B1A0A" opacity=".1"/>
+            <path d="M46,50 Q36,74 35,104 Q35,136 80,138 Q125,136 125,104 Q124,74 114,50 Z" fill="#C4783A"/>
+            <ellipse cx="80" cy="50" rx="34" ry="11" fill="#D4904A"/>
+            <ellipse cx="80" cy="46" rx="26" ry="8" fill="#8B4520"/>
+            <path d="M46,80 Q63,72 80,80 Q97,72 114,80" stroke="#F0C090" stroke-width="2.5" fill="none" opacity=".75"/>
+            <path d="M44,98 Q63,90 80,98 Q97,90 116,98" stroke="#F0C090" stroke-width="2.5" fill="none" opacity=".75"/>
+            <path d="M45,116 Q63,108 80,116 Q97,108 115,116" stroke="#F0C090" stroke-width="2.5" fill="none" opacity=".75"/>
+            <path d="M48,76 Q55,68 62,74" stroke="#D4904A" stroke-width="2" fill="none" opacity=".5"/>
+          </svg>
+          <span class="pol-label">Hand-glazed ceramic 🏺</span>
+        </div>
+
+        <!-- Polaroid 4: Warm brush strokes (no purple) -->
+        <div class="pol">
+          <svg class="pol-art" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="#FAF0E0"/>
+            <rect x="8" y="8" width="144" height="144" rx="2" stroke="#D6C4A0" stroke-width="2" fill="none"/>
+            <path d="M18,48 Q52,28 88,52 Q124,78 148,46" stroke="#C4503A" stroke-width="11" fill="none" stroke-linecap="round"/>
+            <path d="M16,80 Q58,54 100,80 Q130,100 148,70" stroke="#D4902A" stroke-width="9" fill="none" stroke-linecap="round"/>
+            <path d="M20,112 Q65,88 108,114 Q134,130 148,108" stroke="#8B4020" stroke-width="8" fill="none" stroke-linecap="round"/>
+            <path d="M18,138 Q70,120 122,140 Q140,146 150,134" stroke="#C4783A" stroke-width="6" fill="none" stroke-linecap="round"/>
+            <circle cx="36" cy="33" r="5" fill="#C4503A" opacity=".7"/>
+            <circle cx="118" cy="60" r="4" fill="#D4902A" opacity=".7"/>
+            <circle cx="74" cy="26" r="3" fill="#8B4020" opacity=".6"/>
+          </svg>
+          <span class="pol-label">Brushstroke art 🖌️</span>
+        </div>
+
+        <!-- Polaroid 5: Paint palette -->
+        <div class="pol">
+          <svg class="pol-art" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="#F5ECD7"/>
+            <path d="M18,80 Q16,34 65,26 Q108,22 120,58 Q128,84 110,100 Q94,114 74,106 Q63,100 52,108 Q26,122 18,98 Q13,88 18,80Z" fill="#EDE0CC" stroke="#C4A882" stroke-width="2.5"/>
+            <circle cx="44" cy="44" r="11" fill="#C4503A" opacity=".92"/>
+            <circle cx="76" cy="32" r="11" fill="#D4902A" opacity=".92"/>
+            <circle cx="104" cy="50" r="11" fill="#8B6030" opacity=".92"/>
+            <circle cx="110" cy="80" r="10" fill="#5A7830" opacity=".92"/>
+            <circle cx="34" cy="76" r="9"  fill="#A05030" opacity=".92"/>
+            <circle cx="60" cy="94" r="13" fill="#F5ECD7" opacity=".95"/>
+            <!-- brush lying across palette -->
+            <rect x="95" y="108" width="10" height="44" rx="5" fill="#8B5E3C" transform="rotate(-32 100 130)"/>
+            <rect x="94" y="147" width="12" height="8" rx="2" fill="#C4A882" transform="rotate(-32 100 151)"/>
+            <path d="M88,160 Q92,167 102,162 Q104,154 98,150 Z" fill="#5A2A10" transform="rotate(-32 96 158)"/>
+          </svg>
+          <span class="pol-label">Artist's palette 🎨</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- wave cream -->
+<svg class="wave" viewBox="0 0 1440 72" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:#EDE0CC;">
+  <path d="M0,42 C320,0 800,72 1440,26 L1440,72 L0,72 Z" fill="#F5ECD7"/>
+</svg>
+
+<!-- CTA -->
+<section id="cta">
+  <div class="cta-inner fi">
+    <p class="cta-eyebrow">Ready to create?</p>
+    <h2 class="cta-head">Come paint with us.</h2>
+    <p class="cta-sub">No experience needed — just bring your curiosity.</p>
+    <a href="#footer" class="btn-cta">Find Us in Abu Dhabi →</a>
+  </div>
+</section>
+
+<!-- wave cream -->
+<svg class="wave" viewBox="0 0 1440 50" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" style="background:var(--br);">
+  <path d="M0,25 C480,50 960,0 1440,30 L1440,50 L0,50 Z" fill="var(--choc)"/>
+</svg>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div class="ctr foot-inner">
+    <p class="foot-logo">☕ Tiny Canvas Cafe</p>
+    <p class="foot-tag">Meet, Sip, and Create!</p>
+    <svg class="foot-divider-wave" viewBox="0 0 380 20" xmlns="http://www.w3.org/2000/svg">
+      <path d="M0,10 C60,20 120,0 190,10 C260,20 320,0 380,10" stroke="#C4A882" stroke-width="1.5" fill="none"/>
+    </svg>
+    <div class="foot-grid">
+      <div class="foot-col">
+        <p class="foot-col-label">Visit Us</p>
+        <p>Abu Dhabi, UAE</p>
+        <p>Sun – Thu: 10am – 10pm</p>
+        <p>Fri – Sat: 10am – 11pm</p>
+      </div>
+      <div class="foot-col">
+        <p class="foot-col-label">Explore</p>
+        <a href="#about">About Us</a>
+        <a href="#activities">Activities</a>
+        <a href="#menu">Our Menu</a>
+        <a href="#gallery">Gallery</a>
+      </div>
+      <div class="foot-col">
+        <p class="foot-col-label">Follow Along</p>
+        <div class="foot-soc">
+          <a href="#" class="soc-btn" aria-label="Instagram">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </a>
+          <a href="#" class="soc-btn" aria-label="TikTok">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.27 8.27 0 004.84 1.55V6.79a4.85 4.85 0 01-1.07-.1z"/></svg>
+          </a>
+        </div>
+        <p style="margin-top:12px;">@tinycanvascafe</p>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p class="foot-copy">© 2025 Tiny Canvas Cafe · Abu Dhabi, UAE · All rights reserved</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const prog = document.getElementById('prog');
+  const nav  = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+    prog.style.width = pct + '%';
+    nav.classList.toggle('solid', window.scrollY > 100); /* solid after 100px */
+  }, { passive: true });
+
+  const floatEls = document.querySelectorAll('.fl');
+  document.addEventListener('mousemove', e => {
+    const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
+    const dx = (e.clientX - cx) / cx, dy = (e.clientY - cy) / cy;
+    floatEls.forEach(el => {
+      const d = parseFloat(el.dataset.depth || '.5');
+      el.style.transform = `translate(${dx*d*26}px,${dy*d*26}px)`;
+    });
+  });
+
+  const rotator = document.getElementById('rotator');
+  const WREM = 2.6;
+  let ridx = 0;
+  setInterval(() => {
+    ridx++;
+    rotator.style.transition = 'transform .55s cubic-bezier(.25,.46,.45,.94)';
+    rotator.style.transform  = `translateY(-${ridx * WREM}rem)`;
+    if (ridx >= 3) {
+      setTimeout(() => {
+        rotator.style.transition = 'none';
+        ridx = 0;
+        rotator.style.transform = 'translateY(0)';
+      }, 560);
+    }
+  }, 2800);
+
+  const io = new IntersectionObserver(entries =>
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('vis'); }),
+    { threshold: 0.1 }
+  );
+  document.querySelectorAll('.fi').forEach(el => io.observe(el));
+
+  document.querySelectorAll('.menu-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.menu-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const t = document.querySelector(a.getAttribute('href'));
+      if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 68, behavior: 'smooth' });
+    });
+  });
+</script>
+</body>
+</html>
